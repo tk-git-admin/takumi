@@ -8,7 +8,7 @@ import {
 	normalizeDetailsResponse,
 	normalizeListResponse,
 	normalizeLocale,
-} from '../utils/kurocoContent.mjs';
+} from '../server/shared/kurocoContent.mjs';
 
 const apiConfig = {
 	baseUrl: 'https://cms.example.test/base/',

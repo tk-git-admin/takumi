@@ -5,7 +5,7 @@ import {
 	normalizeDetailsResponse,
 	normalizeListResponse,
 	normalizeLocale,
-} from '../../utils/kurocoContent.mjs';
+} from '../shared/kurocoContent.mjs';
 
 type ContentType = 'home' | 'news' | 'products' | 'knives';
 

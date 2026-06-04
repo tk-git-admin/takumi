@@ -2,7 +2,7 @@ import {
 	mapContactPayload,
 	selectContactFormId,
 	validateContactPayload,
-} from '../../utils/contactValidation.mjs';
+} from '../shared/contactValidation.mjs';
 
 export default defineEventHandler(async (event) => {
 	const validation = validateContactPayload(await readBody(event));

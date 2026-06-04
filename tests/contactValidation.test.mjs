@@ -5,7 +5,7 @@ import {
 	mapContactPayload,
 	selectContactFormId,
 	validateContactPayload,
-} from '../utils/contactValidation.mjs';
+} from '../server/shared/contactValidation.mjs';
 
 test('contact validation trims accepted payloads and preserves app-level fields', () => {
 	const result = validateContactPayload({
