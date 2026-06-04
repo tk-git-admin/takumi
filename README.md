@@ -4,6 +4,12 @@ Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introdu
 
 ## Setup
 
+Initialize repository-local reusable skills:
+
+```bash
+git submodule update --init --recursive
+```
+
 Make sure to install the dependencies:
 
 ```bash
@@ -61,4 +67,18 @@ KUROCO_KNIVES_ID=
 KUROCO_FORM_JP_ID=
 KUROCO_FORM_ENG_ID=
 NUXT_PUBLIC_SITE_URL=
+```
+
+## Reusable Skills
+
+This project uses reusable implementation skills from `docs/skills`, which is a Git submodule.
+
+Before non-trivial implementation work, inspect `docs/skills` for a matching `SKILL.md` and follow it unless project-specific instructions conflict.
+
+To update skills:
+
+```bash
+git submodule update --remote docs/skills
+git add docs/skills
+git commit -m "chore(skills): update reusable patterns"
 ```
