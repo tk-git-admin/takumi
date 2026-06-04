@@ -1,0 +1,75 @@
+{
+	"metaDescription": "Software development, mobile app development, and IT outsourcing services in Malaysia. We also support offshore development for Japanese companies.",
+	"links": {
+		"home": "Home",
+		"company": "About",
+		"news": "News",
+		"product": "Product",
+		"knives": "Knife",
+		"watches": "Watch",
+		"service": "Services",
+		"halal": "Halal",
+		"contact": "Contact",
+		"development": "Development",
+		"language": "日本語"
+	},
+	"seo": {
+		"title": "Takumi International Sdn Bhd",
+		"ogTitle": "Takumi International Sdn Bhd",
+		"description": "Takumi International imports the finest Japanese goods and crafts, bring the best of Japan to Malaysia. Trust us to elevate your business with our expertise and quality products. We also offer consultation businesses targeting the Muslim demographic.",
+		"ogDescription": "Takumi International imports the finest Japanese goods and crafts, bring the best of Japan to Malaysia. Trust us to elevate your business with our expertise and quality products. We also offer consultation businesses targeting the Muslim demographic.",
+		"twitterCard": "summary_large_image"
+	},
+	"hero": {
+		"button": "Check it Out!"
+	},
+	"contact": {
+		"title": "CONTACT",
+		"subtitle": "We are where you need us to be.",
+		"titlePrompt": "SEND A MESSAGE",
+		"namePrompt": "YOUR NAME",
+		"nameHint": "Enter Your Name",
+		"emailPrompt": "EMAIL ADDRESS",
+		"messagePrompt": "MESSAGE",
+		"messageHint": "What can we help you with?",
+		"sendButton": "Submit",
+		"form": {
+			"success": "Thank you! Your message has been received. We will get back to you shortly.",
+			"error": "Failed to Connect To Server. Please try again later.",
+			"empty": "Please complete all the required fields.",
+			"email": "Please key in a valid email."
+		}
+	},
+	"product": {
+		"order": "Order",
+		"soldout": "Sold Out",
+		"view": "View Details"
+	},
+	"topBanner": {
+		"title": "CASIO G-SHOCK WATCHES",
+		"detail1": "The trusted Malaysia marketplace to buy G-Shock from Japan",
+		"detail2": "\"BELI G-SHOCK ORI, LOCAL MALAYSIAN SELLER\""
+	},
+	"knivesBanner": {
+		"title": "Yoshimune Japanese Knives",
+		"detail": "The trusted place to buy high quality Japanese kitchen knives in Malaysia"
+	},
+	"getStarted": {
+		"title": "HOW TO GET STARTED?",
+		"subtitle": "Just contact us to search for goods you want to buy in Japan"
+	},
+	"corporate": {
+		"title": "CORPORATE INFO",
+		"name": "Company Name",
+		"address": "Address",
+		"manager": "Managing Director",
+		"phone": "Phone No.",
+		"registration": "Registered No.",
+		"establishment": "Date of establishment"
+	},
+	"news": {
+		"title": "Latest News",
+		"view": "view",
+		"more": "See More"
+	}
+}
