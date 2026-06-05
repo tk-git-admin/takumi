@@ -107,3 +107,20 @@ test('news detail hero title prefers Kuroco native subject over custom hero titl
 		pageInfo: null,
 	});
 });
+
+test('news detail hero title decodes HTML entities from Kuroco native subject', () => {
+	const list = [
+		{
+			slug: 'fair_2026',
+			subject: '[Update] Takumi International to Host Premium &quot;Japan Fair&quot; at SEIBU',
+			hero: {
+				hero_title: 'Takumi International to Host Premium "Japan Fair" at SEIBU',
+			},
+		},
+	];
+
+	assert.equal(
+		findNewsBySlug(list, 'fair_2026').details.hero.hero_title,
+		'[Update] Takumi International to Host Premium "Japan Fair" at SEIBU',
+	);
+});

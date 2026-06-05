@@ -22,12 +22,29 @@ function asString(value) {
 	return typeof value === 'string' ? value.trim() : '';
 }
 
+function decodeHtmlEntities(value) {
+	return value.replace(/&(#\d+|#x[\da-f]+|quot|amp|lt|gt|apos);/gi, (match, entity) => {
+		const normalized = entity.toLowerCase();
+		if (normalized === 'quot') return '"';
+		if (normalized === 'amp') return '&';
+		if (normalized === 'lt') return '<';
+		if (normalized === 'gt') return '>';
+		if (normalized === 'apos') return "'";
+
+		const codePoint = normalized.startsWith('#x')
+			? Number.parseInt(normalized.slice(2), 16)
+			: Number.parseInt(normalized.slice(1), 10);
+
+		return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : match;
+	});
+}
+
 function preferNativeTitleForHero(details) {
 	if (!details || typeof details !== 'object' || Array.isArray(details)) {
 		return details || null;
 	}
 
-	const nativeTitle = asString(details.subject);
+	const nativeTitle = decodeHtmlEntities(asString(details.subject));
 	if (!nativeTitle) {
 		return details;
 	}
