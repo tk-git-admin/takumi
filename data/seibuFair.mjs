@@ -4,7 +4,9 @@ export const seibuFairEvent = {
 	subtitle: 'Craft & Culture',
 	host: 'TAKUMI International x SEIBU TRX',
 	intro:
-		'A focused showcase of Japanese craft, lifestyle goods, and cultural workshops at SEIBU TRX.',
+		'A focused showcase of Japanese craft, lifestyle goods, and free cultural workshops at SEIBU TRX.',
+	productIntro:
+		'Browse selected craft, lifestyle, wellness, and tableware pieces from the participating brands before visiting the Level 2 Event Hall.',
 	dates: {
 		year: 2026,
 		range: 'June 19-30, 2026',
@@ -28,60 +30,119 @@ export const seibuFairEvent = {
 			name: 'Kimono Hijab',
 			src: '/img/seibu-fair/kimono-hijab.jpg',
 			company: 'Takumi International',
+			description: 'Kimono-inspired styling for modest fashion and everyday occasion wear.',
 		},
 		{
 			name: 'Pearl Accessories',
 			src: '/img/seibu-fair/pearl-accessories.jpg',
 			company: 'Uwajima Pearl',
+			description: 'Refined pearl accessories selected for gifting, formal styling, and daily use.',
 		},
 		{
 			name: 'JAPONISM Vegan Soap',
 			src: '/img/seibu-fair/japonism-vegan-soap.jpg',
 			company: 'JAPONISM',
+			description: 'Plant-based personal care with Japanese-inspired fragrance and packaging.',
 		},
 		{
 			name: 'SUZUKAZE Cooling Hijab',
 			src: '/img/seibu-fair/suzukaze-cooling-hijab.jpg',
 			company: 'Fukushin',
+			description: 'Cooling textile styling designed for warm Malaysian weather.',
 		},
 		{
 			name: 'takefumi slippers',
 			src: '/img/seibu-fair/takefumi-slippers.jpeg',
 			company: 'LITA',
+			description: 'Comfort-focused slippers inspired by bamboo texture and home wellness.',
 		},
 		{
 			name: 'Tantoku Knife',
 			src: '/img/seibu-fair/tantoku.jpg',
 			company: 'Yoshimune Cutlery',
+			description: 'A compact Japanese kitchen knife for precise everyday preparation.',
 		},
 		{
 			name: 'YOSHINO Plate',
 			src: '/img/seibu-fair/yoshino-plate-large.jpg',
 			company: 'SUI-RYU',
+			description: 'Large ceramic serving ware with a quiet, refined craft finish.',
 		},
 	],
 	exhibitors: [
-		'Takumi International',
-		'宇和海真珠',
-		'由宗刃物',
-		'FITOKIO (TAC & IDCJ Wellness Sdn Bhd)',
-		'YOU&ME DSPH SDN BHD',
-		'株式会社SUI-RYU',
-		'wawawa 和輪笑',
-		'QLOGO (クロゴ)',
-		'株式会社LITA',
-		'株式会社JAPONISM',
-		'株式会社クレオ',
-		'株式会社ezu',
-		'株式会社フクシン',
-		'テイラーズ大学',
-	].map((name, index) => ({
+		{
+			name: 'Takumi International',
+			description:
+				'Curates Japanese craft, lifestyle goods, and cultural experiences for visitors in Malaysia.',
+		},
+		{
+			name: '宇和海真珠',
+			description:
+				'Presents pearl accessories connected to Uwajima coastal craft and elegant occasion styling.',
+		},
+		{
+			name: '由宗刃物',
+			description:
+				'Introduces Japanese cutlery with a focus on practical kitchen tools and careful finishing.',
+		},
+		{
+			name: 'FITOKIO (TAC & IDCJ Wellness Sdn Bhd)',
+			description:
+				'Shares wellness-focused lifestyle ideas for visitors interested in care, balance, and daily routines.',
+		},
+		{
+			name: 'YOU&ME DSPH SDN BHD',
+			description:
+				'Brings selected lifestyle goods for families, gifting, and everyday cultural discovery.',
+		},
+		{
+			name: '株式会社SUI-RYU',
+			description:
+				'Shows dining and tableware pieces shaped for calm presentation and refined entertaining.',
+		},
+		{
+			name: 'wawawa 和輪笑',
+			description:
+				'Highlights approachable Japanese lifestyle goods with a warm community-minded point of view.',
+		},
+		{
+			name: 'QLOGO (クロゴ)',
+			description:
+				'Presents design-led goods and brand expressions that connect Japanese ideas with local audiences.',
+		},
+		{
+			name: '株式会社LITA',
+			description:
+				'Features comfort and wellness products including takefumi slippers for relaxed home routines.',
+		},
+		{
+			name: '株式会社JAPONISM',
+			description:
+				'Offers personal-care items that pair Japanese sensibility with gentle daily-use formulations.',
+		},
+		{
+			name: '株式会社クレオ',
+			description:
+				'Presents curated lifestyle items for visitors exploring Japanese goods and cultural details.',
+		},
+		{
+			name: '株式会社ezu',
+			description:
+				'Introduces selected Japanese products suited to gifting, display, and everyday appreciation.',
+		},
+		{
+			name: '株式会社フクシン',
+			description:
+				'Shares textile and cooling-wear ideas made for comfort, function, and seasonal styling.',
+		},
+		{
+			name: 'テイラーズ大学',
+			description:
+				'Joins as an education partner supporting cultural exchange and hands-on event participation.',
+		},
+	].map((exhibitor, index) => ({
 		id: `exhibitor-${index + 1}`,
-		name,
-		description:
-			index === 0
-				? 'Japanese craft, lifestyle, and cultural products curated for visitors in Malaysia.'
-				: 'Dummy company introduction for the SEIBU fair frontend preview.',
+		...exhibitor,
 	})),
 	experiences: [
 		{

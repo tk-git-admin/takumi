@@ -41,7 +41,7 @@
 			<div class="seibu-shell">
 				<div class="seibu-product-strip__header">
 					<p>Featured Products</p>
-					<span>Dummy product information for frontend preview</span>
+					<span>{{ event.productIntro }}</span>
 				</div>
 				<div class="seibu-product-mosaic" aria-label="Featured products">
 					<figure
@@ -52,6 +52,7 @@
 						<figcaption>
 							<span>{{ asset.name }}</span>
 							<small>{{ asset.company }}</small>
+							<em>{{ asset.description }}</em>
 						</figcaption>
 					</figure>
 				</div>
@@ -555,9 +556,12 @@ useSeoMeta({
 }
 
 .seibu-product-strip__header span {
+	max-width: 40rem;
 	color: rgba(255, 255, 255, 0.64);
 	font-size: 0.88rem;
 	font-weight: 700;
+	line-height: 1.6;
+	text-align: right;
 }
 
 .seibu-product-mosaic {
@@ -594,14 +598,15 @@ useSeoMeta({
 	left: 0;
 	display: grid;
 	gap: 0.15rem;
-	min-height: 4.5rem;
+	min-height: 7.5rem;
 	padding: 0.75rem;
 	background: linear-gradient(0deg, rgba(21, 19, 19, 0.88), rgba(21, 19, 19, 0.46));
 	color: #fff;
 }
 
 .seibu-product-mosaic__item span,
-.seibu-product-mosaic__item small {
+.seibu-product-mosaic__item small,
+.seibu-product-mosaic__item em {
 	overflow-wrap: anywhere;
 	line-height: 1.2;
 }
@@ -614,6 +619,16 @@ useSeoMeta({
 .seibu-product-mosaic__item small {
 	color: rgba(255, 255, 255, 0.76);
 	font-size: 0.72rem;
+}
+
+.seibu-product-mosaic__item em {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	color: rgba(255, 255, 255, 0.86);
+	font-size: 0.7rem;
+	font-style: normal;
 }
 
 .seibu-section {
@@ -990,6 +1005,10 @@ useSeoMeta({
 	.seibu-product-strip__header {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+
+	.seibu-product-strip__header span {
+		text-align: left;
 	}
 
 	.seibu-hero__poster {

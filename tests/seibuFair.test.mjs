@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 
 import { seibuFairEvent } from '../data/seibuFair.mjs';
@@ -19,6 +19,28 @@ test('SEIBU fair event data uses the approved frontend scope', () => {
 	assert.equal(seibuFairEvent.stats.experiences, seibuFairEvent.experiences.length);
 	assert.equal(seibuFairEvent.stats.experiences, 3);
 	assert.equal(seibuFairEvent.productAssets.length, 7);
+});
+
+test('SEIBU fair event data has production copy instead of placeholder text', () => {
+	const serialized = JSON.stringify(seibuFairEvent).toLowerCase();
+
+	assert.equal(serialized.includes('dummy'), false);
+	assert.equal(serialized.includes('sample'), false);
+	assert.equal(serialized.includes('サンプル'), false);
+	assert.equal(typeof seibuFairEvent.productIntro, 'string');
+	assert.ok(seibuFairEvent.productIntro.length > 40);
+	assert.equal(seibuFairEvent.exhibitors.every((exhibitor) => exhibitor.description.length > 40), true);
+	assert.equal(
+		seibuFairEvent.productAssets.every((asset) => asset.description && asset.description.length > 24),
+		true,
+	);
+});
+
+test('SEIBU fair product assets are available in the public image folder', async () => {
+	for (const asset of seibuFairEvent.productAssets) {
+		assert.match(asset.src, /^\/img\/seibu-fair\//);
+		await access(new URL(`../public${asset.src}`, import.meta.url));
+	}
 });
 
 test('registration validation requires name, valid email, and available seats', () => {
@@ -91,4 +113,12 @@ test('SEIBU announcement is gated to homepage routes in the nav', async () => {
 	assert.equal(navSource.includes('v-if="isHomePage"'), true);
 	assert.equal(navSource.includes("['/', '/ja', '/ja/']"), true);
 	assert.match(navSource, /<AnnouncementBar/);
+});
+
+test('SEIBU event page uses event data for product section copy', async () => {
+	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
+
+	assert.equal(pageSource.includes('Dummy product information'), false);
+	assert.equal(pageSource.includes('event.productIntro'), true);
+	assert.equal(pageSource.includes('asset.description'), true);
 });
