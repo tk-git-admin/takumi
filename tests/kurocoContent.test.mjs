@@ -82,3 +82,28 @@ test('news detail lookup returns a stable details response by slug', () => {
 	});
 	assert.deepEqual(findNewsBySlug(list, 'missing'), { details: null, pageInfo: null });
 });
+
+test('news detail hero title prefers Kuroco native subject over custom hero title', () => {
+	const list = [
+		{
+			slug: 'fair_2026',
+			subject: '[Update] Takumi International Sdn Bhd Bringing the Art of Japanese Tradition',
+			hero: {
+				hero_title: 'Takumi International Sdn Bhd Bringing the Art of Japanese Tradition',
+				hero_subtitle: '',
+			},
+		},
+	];
+
+	assert.deepEqual(findNewsBySlug(list, 'fair_2026'), {
+		details: {
+			slug: 'fair_2026',
+			subject: '[Update] Takumi International Sdn Bhd Bringing the Art of Japanese Tradition',
+			hero: {
+				hero_title: '[Update] Takumi International Sdn Bhd Bringing the Art of Japanese Tradition',
+				hero_subtitle: '',
+			},
+		},
+		pageInfo: null,
+	});
+});

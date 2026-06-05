@@ -18,6 +18,34 @@ export function isValidSlug(slug) {
 	return /^[A-Za-z0-9_-]+$/.test(String(slug || ''));
 }
 
+function asString(value) {
+	return typeof value === 'string' ? value.trim() : '';
+}
+
+function preferNativeTitleForHero(details) {
+	if (!details || typeof details !== 'object' || Array.isArray(details)) {
+		return details || null;
+	}
+
+	const nativeTitle = asString(details.subject);
+	if (!nativeTitle) {
+		return details;
+	}
+
+	const hero = details.hero;
+	if (!hero || typeof hero !== 'object' || Array.isArray(hero)) {
+		return details;
+	}
+
+	return {
+		...details,
+		hero: {
+			...hero,
+			hero_title: nativeTitle,
+		},
+	};
+}
+
 export function buildKurocoContentUrl(config, contentType, locale = 'en') {
 	const pathBuilder = CONTENT_PATHS[contentType];
 	if (!pathBuilder) {
@@ -40,7 +68,7 @@ export function normalizeListResponse(response = {}) {
 
 export function normalizeDetailsResponse(response = {}) {
 	return {
-		details: response.details || null,
+		details: preferNativeTitleForHero(response.details),
 		pageInfo: response.pageInfo || null,
 	};
 }
@@ -51,7 +79,7 @@ export function findNewsBySlug(list, slug) {
 		: null;
 
 	return {
-		details: details || null,
+		details: preferNativeTitleForHero(details),
 		pageInfo: null,
 	};
 }
