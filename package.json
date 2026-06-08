@@ -3,6 +3,7 @@
 	"private": true,
 	"scripts": {
 		"build": "nuxt build",
+		"deploy": "npx wrangler@3.114.17 --cwd .output deploy server/index.mjs --site public --name takumi --compatibility-date 2026-06-08",
 		"dev": "volta run --node 18.19.0 nuxt dev",
 		"preview": "nuxt preview",
 		"start": "node .output/server/index.mjs",

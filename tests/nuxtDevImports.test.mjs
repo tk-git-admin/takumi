@@ -36,3 +36,16 @@ test('package import aliases do not override Nuxt package imports', async () => 
 
 	assert.equal(Object.hasOwn(pkg, 'imports'), false);
 });
+
+test('Cloudflare Worker deployment config is versioned with the app', async () => {
+	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
+
+	assert.equal(
+		pkg.scripts.deploy,
+		'npx wrangler@3.114.17 --cwd .output deploy server/index.mjs --site public --name takumi --compatibility-date 2026-06-08',
+	);
+	assert.match(nuxtConfig, /preset:\s*'cloudflare-module'/);
+	assert.match(nuxtConfig, /deployConfig:\s*true/);
+	assert.match(nuxtConfig, /nodeCompat:\s*true/);
+});

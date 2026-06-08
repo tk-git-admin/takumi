@@ -31,6 +31,13 @@ export default defineNuxtConfig({
 		},
 	},
 	devtools: { enabled: true },
+	nitro: {
+		preset: 'cloudflare-module',
+		cloudflare: {
+			deployConfig: true,
+			nodeCompat: true,
+		},
+	},
 	modules: ['@nuxtjs/i18n', '@pinia/nuxt', '@nuxtjs/tailwindcss', 'nuxt-icon'],
 	css: ['@/assets/css/tokens.css', '@/assets/css/main.css'],
 	i18n: {
