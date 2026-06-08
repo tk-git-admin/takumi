@@ -3,6 +3,7 @@
 	"private": true,
 	"scripts": {
 		"build": "nuxt build",
+		"postbuild": "node scripts/write-cloudflare-wrangler-config.mjs",
 		"deploy": "npx wrangler@3.114.17 --cwd .output deploy server/index.mjs --site public --name takumi --compatibility-date 2026-06-08",
 		"dev": "volta run --node 18.19.0 nuxt dev",
 		"preview": "nuxt preview",
@@ -24,7 +25,8 @@
 		"nuxt": "3.10.3",
 		"nuxt-icon": "0.6.8",
 		"prettier": "3.1.1",
-		"sass": "1.71.1"
+		"sass": "1.71.1",
+		"wrangler": "3.114.17"
 	},
 	"dependencies": {
 		"@fancyapps/ui": "^5.0.24",

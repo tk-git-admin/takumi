@@ -51,6 +51,15 @@ Locally preview production build with Nuxt:
 npm run preview
 ```
 
+Deploy to Cloudflare Workers:
+
+```bash
+npm run build
+npm run deploy
+```
+
+`npm run build` writes `.output/wrangler.toml` after Nitro finishes, so Cloudflare Workers Builds can also run the dashboard command `npx wrangler --cwd .output deploy`.
+
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
 ## Runtime Config

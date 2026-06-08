@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
-import { access, readdir, readFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 async function exists(path) {
@@ -15,7 +17,10 @@ async function exists(path) {
 test('server-only Kuroco helpers are outside Nuxt top-level utils auto-imports', async () => {
 	assert.equal(await exists(new URL('../utils/contactValidation.mjs', import.meta.url)), false);
 	assert.equal(await exists(new URL('../utils/kurocoContent.mjs', import.meta.url)), false);
-	assert.equal(await exists(new URL('../server/shared/contactValidation.mjs', import.meta.url)), true);
+	assert.equal(
+		await exists(new URL('../server/shared/contactValidation.mjs', import.meta.url)),
+		true,
+	);
 	assert.equal(await exists(new URL('../server/shared/kurocoContent.mjs', import.meta.url)), true);
 });
 
@@ -41,11 +46,35 @@ test('Cloudflare Worker deployment config is versioned with the app', async () =
 	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
 
+	assert.equal(pkg.scripts.postbuild, 'node scripts/write-cloudflare-wrangler-config.mjs');
 	assert.equal(
 		pkg.scripts.deploy,
 		'npx wrangler@3.114.17 --cwd .output deploy server/index.mjs --site public --name takumi --compatibility-date 2026-06-08',
 	);
+	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
 	assert.match(nuxtConfig, /preset:\s*'cloudflare-module'/);
 	assert.match(nuxtConfig, /deployConfig:\s*true/);
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
+});
+
+test('postbuild writes Wrangler config for Cloudflare dashboard deploy command', async () => {
+	const { writeWranglerConfig } = await import(
+		new URL('../scripts/write-cloudflare-wrangler-config.mjs', import.meta.url)
+	);
+	const outputDir = await mkdtemp(join(tmpdir(), 'takumi-wrangler-'));
+
+	try {
+		await mkdir(join(outputDir, 'server'), { recursive: true });
+		await mkdir(join(outputDir, 'public'), { recursive: true });
+		await writeFile(join(outputDir, 'server/index.mjs'), '');
+
+		await writeWranglerConfig(outputDir);
+
+		const config = await readFile(join(outputDir, 'wrangler.toml'), 'utf8');
+		assert.match(config, /name = "takumi"/);
+		assert.match(config, /main = "server\/index\.mjs"/);
+		assert.match(config, /\[site\]\nbucket = "public"/);
+	} finally {
+		await rm(outputDir, { recursive: true, force: true });
+	}
 });
