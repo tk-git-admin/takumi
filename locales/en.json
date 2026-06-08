@@ -11,7 +11,8 @@
 		"halal": "Halal",
 		"contact": "Contact",
 		"development": "Development",
-		"language": "日本語"
+		"language": "日本語",
+		"menu": "Menu"
 	},
 	"seo": {
 		"title": "Takumi International Sdn Bhd",
@@ -71,5 +72,77 @@
 		"title": "Latest News",
 		"view": "view",
 		"more": "See More"
+	},
+	"seibuFair": {
+		"announcement": {
+			"label": "19-30 Jun 2026",
+			"title": "SEIBU Fair",
+			"actionLabel": "View event"
+		},
+		"posterAlt": "SEIBU fair poster",
+		"details": {
+			"date": "Date",
+			"venue": "Venue",
+			"admission": "Admission"
+		},
+		"stats": {
+			"companies": "Companies",
+			"exhibits": "Exhibits",
+			"handsOnEvents": "Hands-on events"
+		},
+		"sections": {
+			"companies": "Participating companies",
+			"products": "Selected products",
+			"registration": "Experience & Registration",
+			"registrationIntro": "Choose a workshop session and reserve your seat."
+		},
+		"tabs": {
+			"yukata": "Yukata",
+			"origami": "Origami",
+			"color": "Color Coordination"
+		},
+		"table": {
+			"session": "Session",
+			"seats": "Seats",
+			"seatsBooked": "{booked} / {capacity} seats booked"
+		},
+		"actions": {
+			"reserveSeat": "Reserve seat",
+			"reserve": "Reserve",
+			"full": "Full",
+			"done": "Done",
+			"submitting": "Submitting...",
+			"submitReservation": "Submit reservation"
+		},
+		"reservation": {
+			"completeTitle": "Thank you",
+			"completeMessage": "Please check your reservation details below.",
+			"previewNote": "Preview only. The Kuroco reservation form is not configured yet.",
+			"reserveTitle": "Reserve {date}",
+			"remainingSeats": "{count} seats left",
+			"summary": {
+				"experience": "Experience",
+				"session": "Session",
+				"name": "Name",
+				"email": "Email",
+				"participants": "Participants",
+				"reference": "Reference"
+			}
+		},
+		"form": {
+			"name": "Name",
+			"email": "Email",
+			"participants": "Participants"
+		},
+		"errors": {
+			"registration": "Please enter your name, a valid email, and a participant count within the remaining seats."
+		},
+		"accessibility": {
+			"experienceType": "Experience type",
+			"closeReservation": "Close reservation form"
+		},
+		"seo": {
+			"description": "{host} presents a SEIBU TRX fair for Japanese craft, culture, products, and free workshops."
+		}
 	}
 }

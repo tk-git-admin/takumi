@@ -18,6 +18,12 @@ export function getRemainingSeats(seatMap, sessionId) {
 	return Math.max(0, session.capacity - session.booked);
 }
 
+export function getBookedSeats(seatMap, sessionId) {
+	const session = seatMap[sessionId];
+	if (!session) return 0;
+	return Math.max(0, session.booked);
+}
+
 export function getSeatPercent(seatMap, sessionId) {
 	const session = seatMap[sessionId];
 	if (!session || session.capacity === 0) return 0;

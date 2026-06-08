@@ -15,6 +15,17 @@ export default defineNuxtConfig({
 		kurocoKnivesId: process.env.KUROCO_KNIVES_ID || '7',
 		kurocoFormJpId: process.env.KUROCO_FORM_JP_ID || '3',
 		kurocoFormEngId: process.env.KUROCO_FORM_ENG_ID || '1',
+		kurocoApiAccessToken: process.env.KUROCO_API_ACCESS_TOKEN || '',
+		kurocoSeibuContentPath:
+			process.env.KUROCO_SEIBU_CONTENT_PATH || '/rcms-api/3/seibu-content',
+		kurocoSeibuWorkshopPath:
+			process.env.KUROCO_SEIBU_WORKSHOP_PATH || '/rcms-api/3/seibu-workshop',
+		kurocoSeibuReservationPostPath:
+			process.env.KUROCO_SEIBU_RESERVATION_POST_PATH || '/rcms-api/1/seibu',
+		kurocoSeibuFormId: process.env.KUROCO_SEIBU_FORM_ID || '',
+		kurocoSeibuFormApiId: process.env.KUROCO_SEIBU_FORM_API_ID || '1',
+		kurocoSeibuReservationListPath:
+			process.env.KUROCO_SEIBU_RESERVATION_LIST_PATH || '/rcms-api/1/seibu-reservations',
 		public: {
 			siteUrl,
 		},

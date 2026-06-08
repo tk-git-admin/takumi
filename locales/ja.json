@@ -11,7 +11,8 @@
 		"halal": "ハラールとは",
 		"contact": "お問い合わせ",
 		"development": "開発事例",
-		"language": "English"
+		"language": "English",
+		"menu": "メニュー"
 	},
 	"seo": {
 		"title": "タクミ・インターナショナル株式会社",
@@ -71,5 +72,77 @@
 		"title": "最新ニュース",
 		"view": "見る",
 		"more": "もっと見る"
+	},
+	"seibuFair": {
+		"announcement": {
+			"label": "2026年6月19日〜30日",
+			"title": "西武フェア",
+			"actionLabel": "イベントを見る"
+		},
+		"posterAlt": "西武フェアポスター",
+		"details": {
+			"date": "開催日",
+			"venue": "会場",
+			"admission": "入場料"
+		},
+		"stats": {
+			"companies": "出展企業",
+			"exhibits": "出品数",
+			"handsOnEvents": "体験イベント"
+		},
+		"sections": {
+			"companies": "出展企業",
+			"products": "主な商品",
+			"registration": "体験イベント・予約",
+			"registrationIntro": "体験イベントを選択し、ご希望の回を予約してください。"
+		},
+		"tabs": {
+			"yukata": "浴衣",
+			"origami": "折り紙",
+			"color": "カラーコーディネート"
+		},
+		"table": {
+			"session": "開催回",
+			"seats": "空席状況",
+			"seatsBooked": "{booked}／{capacity}名予約済み"
+		},
+		"actions": {
+			"reserveSeat": "席を予約する",
+			"reserve": "予約する",
+			"full": "満員",
+			"done": "完了",
+			"submitting": "送信中...",
+			"submitReservation": "予約を送信"
+		},
+		"reservation": {
+			"completeTitle": "ありがとうございます",
+			"completeMessage": "予約内容をご確認ください。",
+			"previewNote": "プレビュー表示です。Kurocoの予約フォームはまだ設定されていません。",
+			"reserveTitle": "{date} を予約",
+			"remainingSeats": "残り{count}席",
+			"summary": {
+				"experience": "体験イベント",
+				"session": "開催回",
+				"name": "お名前",
+				"email": "メールアドレス",
+				"participants": "参加人数",
+				"reference": "受付番号"
+			}
+		},
+		"form": {
+			"name": "お名前",
+			"email": "メールアドレス",
+			"participants": "参加人数"
+		},
+		"errors": {
+			"registration": "お名前、有効なメールアドレス、残席数以内の参加人数を入力してください。"
+		},
+		"accessibility": {
+			"experienceType": "体験イベントの種類",
+			"closeReservation": "予約フォームを閉じる"
+		},
+		"seo": {
+			"description": "{host}が日本の工芸、文化、商品、無料体験を紹介します。"
+		}
 	}
 }
