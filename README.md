@@ -67,6 +67,10 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 The app reads Kuroco CMS values from server-side Nuxt runtime config. Defaults match the migrated source project, and production can override them with:
 
 ```bash
+NUXT_BASIC_AUTH_USERNAME=
+NUXT_BASIC_AUTH_PASSWORD=
+NUXT_BASIC_AUTH_ENABLED=false
+NUXT_BASIC_AUTH_PREVIEW_HOSTNAMES=
 KUROCO_BASE_URL=
 KUROCO_HOME_ID=
 KUROCO_HOME_SLUG_ID=

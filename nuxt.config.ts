@@ -1,4 +1,13 @@
-const siteUrl = process.env.NUXT_PUBLIC_SITE_URL || 'https://takumi-international.g.kuroco-front.app/';
+const siteUrl =
+	process.env.NUXT_PUBLIC_SITE_URL || 'https://takumi-international.g.kuroco-front.app/';
+const basicAuthPreviewHostnames =
+	process.env.NUXT_BASIC_AUTH_PREVIEW_HOSTNAMES || process.env.BASIC_AUTH_PREVIEW_HOSTNAMES || '';
+const PREVIEW_HOSTNAMES = basicAuthPreviewHostnames
+	? basicAuthPreviewHostnames
+			.split(',')
+			.map((hostname) => hostname.trim())
+			.filter(Boolean)
+	: [];
 
 export default defineNuxtConfig({
 	app: {
@@ -7,6 +16,13 @@ export default defineNuxtConfig({
 		},
 	},
 	runtimeConfig: {
+		basicAuthUsername:
+			process.env.NUXT_BASIC_AUTH_USERNAME || process.env.BASIC_AUTH_USERNAME || '',
+		basicAuthPassword:
+			process.env.NUXT_BASIC_AUTH_PASSWORD || process.env.BASIC_AUTH_PASSWORD || '',
+		basicAuthEnabled:
+			process.env.NUXT_BASIC_AUTH_ENABLED === 'true' || process.env.BASIC_AUTH_ENABLED === 'true',
+		previewHostnames: PREVIEW_HOSTNAMES,
 		kurocoBaseUrl: process.env.KUROCO_BASE_URL || 'https://takumi-international.g.kuroco.app',
 		kurocoHomeId: process.env.KUROCO_HOME_ID || '3',
 		kurocoHomeSlugId: process.env.KUROCO_HOME_SLUG_ID || '3',
@@ -16,10 +32,8 @@ export default defineNuxtConfig({
 		kurocoFormJpId: process.env.KUROCO_FORM_JP_ID || '3',
 		kurocoFormEngId: process.env.KUROCO_FORM_ENG_ID || '1',
 		kurocoApiAccessToken: process.env.KUROCO_API_ACCESS_TOKEN || '',
-		kurocoSeibuContentPath:
-			process.env.KUROCO_SEIBU_CONTENT_PATH || '/rcms-api/3/seibu-content',
-		kurocoSeibuWorkshopPath:
-			process.env.KUROCO_SEIBU_WORKSHOP_PATH || '/rcms-api/3/seibu-workshop',
+		kurocoSeibuContentPath: process.env.KUROCO_SEIBU_CONTENT_PATH || '/rcms-api/3/seibu-content',
+		kurocoSeibuWorkshopPath: process.env.KUROCO_SEIBU_WORKSHOP_PATH || '/rcms-api/3/seibu-workshop',
 		kurocoSeibuReservationPostPath:
 			process.env.KUROCO_SEIBU_RESERVATION_POST_PATH || '/rcms-api/1/seibu',
 		kurocoSeibuFormId: process.env.KUROCO_SEIBU_FORM_ID || '',

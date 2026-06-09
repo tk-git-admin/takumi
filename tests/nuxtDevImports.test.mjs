@@ -57,6 +57,44 @@ test('Cloudflare Worker deployment config is versioned with the app', async () =
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
 });
 
+test('Basic Auth middleware follows the Cloudflare Worker runtime-env pattern', async () => {
+	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
+	const middleware = await readFile(
+		new URL('../middleware/basic-auth.global.ts', import.meta.url),
+		'utf8',
+	);
+
+	assert.match(nuxtConfig, /basicAuthUsername:/);
+	assert.match(nuxtConfig, /basicAuthPassword:/);
+	assert.match(nuxtConfig, /basicAuthEnabled:/);
+	assert.match(nuxtConfig, /previewHostnames:/);
+	assert.doesNotMatch(nuxtConfig, /public:\s*\{[^}]*basicAuth/s);
+
+	assert.match(middleware, /import\.meta\.server/);
+	assert.match(middleware, /useRequestEvent\(\)/);
+	assert.match(middleware, /event\.context/);
+	assert.match(middleware, /cloudflare\?\.\env/);
+	assert.match(middleware, /NUXT_BASIC_AUTH_USERNAME/);
+	assert.match(middleware, /NUXT_BASIC_AUTH_PASSWORD/);
+	assert.match(middleware, /NUXT_BASIC_AUTH_ENABLED/);
+	assert.match(middleware, /BASIC_AUTH_USERNAME/);
+	assert.match(middleware, /BASIC_AUTH_PASSWORD/);
+	assert.match(middleware, /BASIC_AUTH_ENABLED/);
+	assert.match(middleware, /getRequestHeader\(event,\s*['"]x-forwarded-host['"]\)/);
+	assert.match(middleware, /WWW-Authenticate/);
+	assert.match(middleware, /Basic realm="Protected"/);
+});
+
+test('Basic Auth environment documentation uses server-only Cloudflare variables', async () => {
+	const envExample = await readFile(new URL('../.env.example', import.meta.url), 'utf8');
+
+	assert.match(envExample, /^NUXT_BASIC_AUTH_USERNAME=/m);
+	assert.match(envExample, /^NUXT_BASIC_AUTH_PASSWORD=/m);
+	assert.match(envExample, /^NUXT_BASIC_AUTH_ENABLED=false/m);
+	assert.match(envExample, /^NUXT_BASIC_AUTH_PREVIEW_HOSTNAMES=/m);
+	assert.doesNotMatch(envExample, /^NUXT_PUBLIC_BASIC_AUTH_/m);
+});
+
 test('postbuild writes Wrangler config for Cloudflare dashboard deploy command', async () => {
 	const { writeWranglerConfig } = await import(
 		new URL('../scripts/write-cloudflare-wrangler-config.mjs', import.meta.url)
