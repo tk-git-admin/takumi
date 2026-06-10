@@ -42,6 +42,28 @@ test('package import aliases do not override Nuxt package imports', async () => 
 	assert.equal(Object.hasOwn(pkg, 'imports'), false);
 });
 
+test('Cloudflare Worker deploy helper targets branch-prefixed staging Workers', async () => {
+	const { buildWranglerArgs, resolveWorkerName } = await import(
+		new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)
+	);
+
+	assert.equal(resolveWorkerName({ WORKERS_CI_BRANCH: 'main' }), 'takumi');
+	assert.equal(resolveWorkerName({ WORKERS_CI_BRANCH: 'test' }), 'test-takumi');
+	assert.equal(
+		resolveWorkerName({ WORKERS_CI_BRANCH: 'feature/seibu fair' }),
+		'feature-seibu-fair-takumi',
+	);
+	assert.deepEqual(buildWranglerArgs(['deploy', '--dry-run'], { WORKERS_CI_BRANCH: 'test' }), [
+		'wrangler@3.114.17',
+		'--cwd',
+		'.output',
+		'deploy',
+		'--dry-run',
+		'--name',
+		'test-takumi',
+	]);
+});
+
 test('Cloudflare Worker deployment config is versioned with the app', async () => {
 	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
@@ -50,11 +72,8 @@ test('Cloudflare Worker deployment config is versioned with the app', async () =
 	);
 
 	assert.equal(pkg.scripts.postbuild, 'node scripts/write-cloudflare-wrangler-config.mjs');
-	assert.equal(pkg.scripts.deploy, 'npx wrangler@3.114.17 --cwd .output deploy');
-	assert.equal(
-		pkg.scripts['deploy:preview'],
-		'npx wrangler@3.114.17 --cwd .output versions upload',
-	);
+	assert.equal(pkg.scripts.deploy, 'node scripts/deploy-cloudflare-worker.mjs deploy');
+	assert.equal(pkg.scripts['deploy:preview'], 'node scripts/deploy-cloudflare-worker.mjs deploy');
 	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
 	assert.equal(wranglerConfig.name, 'takumi');
 	assert.equal(wranglerConfig.main, './.output/server/index.mjs');

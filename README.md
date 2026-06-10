@@ -66,7 +66,7 @@ Deploy command: npm run deploy
 Non-production branch deploy command: npm run deploy:preview
 ```
 
-`npm run build` writes `.output/wrangler.toml` after Nitro finishes, and the deploy scripts run Wrangler with `--cwd .output`. The generated config uses Workers assets instead of legacy Workers Sites so non-production branch preview uploads can run.
+`npm run build` writes `.output/wrangler.toml` after Nitro finishes, and the deploy scripts run Wrangler with `--cwd .output`. Production branch builds deploy the `takumi` Worker. Non-production branch builds use the Workers Builds `WORKERS_CI_BRANCH` value to deploy branch-prefixed Workers such as `test-takumi`, which is the upstream for `test.takumi.com.my`.
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
