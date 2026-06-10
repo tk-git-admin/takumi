@@ -50,8 +50,11 @@ test('Cloudflare Worker deployment config is versioned with the app', async () =
 	);
 
 	assert.equal(pkg.scripts.postbuild, 'node scripts/write-cloudflare-wrangler-config.mjs');
-	assert.equal(pkg.scripts.deploy, 'npx wrangler@3.114.17 deploy');
-	assert.equal(pkg.scripts['deploy:preview'], 'npx wrangler@3.114.17 versions upload');
+	assert.equal(pkg.scripts.deploy, 'npx wrangler@3.114.17 --cwd .output deploy');
+	assert.equal(
+		pkg.scripts['deploy:preview'],
+		'npx wrangler@3.114.17 --cwd .output versions upload',
+	);
 	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
 	assert.equal(wranglerConfig.name, 'takumi');
 	assert.equal(wranglerConfig.main, './.output/server/index.mjs');

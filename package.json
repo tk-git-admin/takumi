@@ -4,8 +4,8 @@
 	"scripts": {
 		"build": "nuxt build",
 		"postbuild": "node scripts/write-cloudflare-wrangler-config.mjs",
-		"deploy": "npx wrangler@3.114.17 deploy",
-		"deploy:preview": "npx wrangler@3.114.17 versions upload",
+		"deploy": "npx wrangler@3.114.17 --cwd .output deploy",
+		"deploy:preview": "npx wrangler@3.114.17 --cwd .output versions upload",
 		"dev": "volta run --node 18.19.0 nuxt dev",
 		"preview": "nuxt preview",
 		"start": "node .output/server/index.mjs",
