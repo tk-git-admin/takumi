@@ -58,7 +58,15 @@ npm run build
 npm run deploy
 ```
 
-`npm run build` writes `.output/wrangler.toml` after Nitro finishes, so Cloudflare Workers Builds can also run the dashboard command `npx wrangler --cwd .output deploy`.
+Cloudflare Workers Builds can use the checked-in `wrangler.jsonc` from the repository root:
+
+```text
+Build command: npm run build
+Deploy command: npm run deploy
+Non-production branch deploy command: npm run deploy:preview
+```
+
+`npm run build` also writes `.output/wrangler.toml` after Nitro finishes for dashboard setups that run Wrangler from `.output`. Both configs use Workers assets instead of legacy Workers Sites so non-production branch preview uploads can run.
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 

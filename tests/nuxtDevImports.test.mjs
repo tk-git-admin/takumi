@@ -45,13 +45,21 @@ test('package import aliases do not override Nuxt package imports', async () => 
 test('Cloudflare Worker deployment config is versioned with the app', async () => {
 	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
+	const wranglerConfig = JSON.parse(
+		await readFile(new URL('../wrangler.jsonc', import.meta.url), 'utf8'),
+	);
 
 	assert.equal(pkg.scripts.postbuild, 'node scripts/write-cloudflare-wrangler-config.mjs');
-	assert.equal(
-		pkg.scripts.deploy,
-		'npx wrangler@3.114.17 --cwd .output deploy server/index.mjs --site public --name takumi --compatibility-date 2026-06-08',
-	);
+	assert.equal(pkg.scripts.deploy, 'npx wrangler@3.114.17 deploy');
+	assert.equal(pkg.scripts['deploy:preview'], 'npx wrangler@3.114.17 versions upload');
 	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
+	assert.equal(wranglerConfig.name, 'takumi');
+	assert.equal(wranglerConfig.main, './.output/server/index.mjs');
+	assert.equal(wranglerConfig.preview_urls, true);
+	assert.deepEqual(wranglerConfig.assets, {
+		binding: 'ASSETS',
+		directory: './.output/public',
+	});
 	assert.match(nuxtConfig, /preset:\s*'cloudflare-module'/);
 	assert.match(nuxtConfig, /deployConfig:\s*true/);
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
@@ -111,7 +119,9 @@ test('postbuild writes Wrangler config for Cloudflare dashboard deploy command',
 		const config = await readFile(join(outputDir, 'wrangler.toml'), 'utf8');
 		assert.match(config, /name = "takumi"/);
 		assert.match(config, /main = "server\/index\.mjs"/);
-		assert.match(config, /\[site\]\nbucket = "public"/);
+		assert.match(config, /preview_urls = true/);
+		assert.match(config, /\[assets\]\nbinding = "ASSETS"\ndirectory = "public"/);
+		assert.doesNotMatch(config, /\[site\]/);
 	} finally {
 		await rm(outputDir, { recursive: true, force: true });
 	}

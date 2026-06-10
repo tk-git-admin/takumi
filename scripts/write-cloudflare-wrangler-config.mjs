@@ -36,9 +36,11 @@ export async function writeWranglerConfig(outputDir = DEFAULT_OUTPUT_DIR) {
 		'name = "takumi"',
 		'main = "server/index.mjs"',
 		'compatibility_date = "2026-06-08"',
+		'preview_urls = true',
 		'',
-		'[site]',
-		'bucket = "public"',
+		'[assets]',
+		'binding = "ASSETS"',
+		'directory = "public"',
 		'',
 	].join('\n');
 	const configPath = join(resolvedOutputDir, 'wrangler.toml');
