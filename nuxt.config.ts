@@ -10,6 +10,7 @@ const PREVIEW_HOSTNAMES = basicAuthPreviewHostnames
 	: [];
 
 export default defineNuxtConfig({
+	compatibilityDate: '2026-06-08',
 	app: {
 		head: {
 			script: [{ type: 'text/javascript', src: 'https://code.jquery.com/jquery-3.6.1.min.js' }],
@@ -46,7 +47,7 @@ export default defineNuxtConfig({
 	},
 	devtools: { enabled: true },
 	nitro: {
-		preset: 'cloudflare-module',
+		preset: 'cloudflare_module',
 		cloudflare: {
 			deployConfig: true,
 			nodeCompat: true,

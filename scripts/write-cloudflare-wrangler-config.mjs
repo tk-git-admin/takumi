@@ -36,6 +36,7 @@ export async function writeWranglerConfig(outputDir = DEFAULT_OUTPUT_DIR) {
 		'name = "takumi"',
 		'main = "server/index.mjs"',
 		'compatibility_date = "2026-06-08"',
+		'compatibility_flags = ["nodejs_compat", "no_nodejs_compat_v2"]',
 		'preview_urls = true',
 		'',
 		'[assets]',

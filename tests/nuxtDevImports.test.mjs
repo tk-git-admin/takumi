@@ -55,12 +55,14 @@ test('Cloudflare Worker deployment config is versioned with the app', async () =
 	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
 	assert.equal(wranglerConfig.name, 'takumi');
 	assert.equal(wranglerConfig.main, './.output/server/index.mjs');
+	assert.deepEqual(wranglerConfig.compatibility_flags, ['nodejs_compat', 'no_nodejs_compat_v2']);
 	assert.equal(wranglerConfig.preview_urls, true);
 	assert.deepEqual(wranglerConfig.assets, {
 		binding: 'ASSETS',
 		directory: './.output/public',
 	});
-	assert.match(nuxtConfig, /preset:\s*'cloudflare-module'/);
+	assert.match(nuxtConfig, /compatibilityDate:\s*'2026-06-08'/);
+	assert.match(nuxtConfig, /preset:\s*'cloudflare_module'/);
 	assert.match(nuxtConfig, /deployConfig:\s*true/);
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
 });
@@ -119,6 +121,7 @@ test('postbuild writes Wrangler config for Cloudflare dashboard deploy command',
 		const config = await readFile(join(outputDir, 'wrangler.toml'), 'utf8');
 		assert.match(config, /name = "takumi"/);
 		assert.match(config, /main = "server\/index\.mjs"/);
+		assert.match(config, /compatibility_flags = \["nodejs_compat", "no_nodejs_compat_v2"\]/);
 		assert.match(config, /preview_urls = true/);
 		assert.match(config, /\[assets\]\nbinding = "ASSETS"\ndirectory = "public"/);
 		assert.doesNotMatch(config, /\[site\]/);
