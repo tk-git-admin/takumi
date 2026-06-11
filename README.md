@@ -67,7 +67,7 @@ Deploy command: npx wrangler --cwd .output deploy
 Version command: npx wrangler versions upload
 ```
 
-`npm run build` lets Nitro generate the Cloudflare Wrangler deployment config under `.output/server/wrangler.json`. The deploy command runs Wrangler with `--cwd .output` so the generated output is deployed. The version command runs from the repository root and follows Nitro's generated `.wrangler/deploy/config.json` redirect to the same generated Worker config. Production deploys the `takumi` Worker. Workers Builds sets `WORKERS_CI_BRANCH`, so the `test` branch generates the `test-takumi` Worker name used by `test.takumi.com.my`. The local `deploy:preview` script deploys the same generated output with an explicit `--name test-takumi` override.
+`npm run build` lets Nitro generate the Cloudflare Wrangler deployment config under `.output/server/wrangler.json`. The deploy command runs Wrangler with `--cwd .output` so the generated output is deployed. The version command runs from the repository root and follows Nitro's generated `.wrangler/deploy/config.json` redirect to the same generated Worker config. Production deploys the `takumi` Worker. `test-takumi.bridge-asia.workers.dev` is the `test` branch preview alias for the `takumi` Worker, not a separate Worker name.
 
 Required Worker variables and secrets should be configured in Cloudflare without committing secret values. The app reads Basic Auth and Kuroco values from server-only runtime config or Cloudflare runtime bindings.
 

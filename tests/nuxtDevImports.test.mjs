@@ -47,16 +47,13 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 
 	assert.equal(Object.hasOwn(pkg.scripts, 'postbuild'), false);
 	assert.equal(pkg.scripts.deploy, 'npx wrangler --cwd .output deploy');
-	assert.equal(
-		pkg.scripts['deploy:preview'],
-		'npx wrangler --cwd .output deploy --name test-takumi',
-	);
+	assert.equal(Object.hasOwn(pkg.scripts, 'deploy:preview'), false);
 	assert.match(readme, /Root directory:\s*\/$/m);
 	assert.match(readme, /Build command:\s*npm run build$/m);
 	assert.match(readme, /Deploy command:\s*npx wrangler --cwd \.output deploy$/m);
 	assert.match(readme, /Version command:\s*npx wrangler versions upload$/m);
-	assert.match(readme, /WORKERS_CI_BRANCH/);
-	assert.match(readme, /`test` branch generates the `test-takumi` Worker name/);
+	assert.match(readme, /`test-takumi\.bridge-asia\.workers\.dev`/);
+	assert.match(readme, /branch preview alias for the `takumi` Worker/);
 	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
 	assert.equal(await exists(new URL('../wrangler.jsonc', import.meta.url)), false);
 	assert.equal(
@@ -72,10 +69,9 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 	assert.match(nuxtConfig, /deployConfig:\s*true/);
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
 	assert.match(nuxtConfig, /wrangler:\s*\{/);
-	assert.match(nuxtConfig, /const cloudflareWorkerName =/);
-	assert.match(nuxtConfig, /WORKERS_CI_BRANCH\s*===\s*'test'/);
-	assert.match(nuxtConfig, /'test-takumi'/);
-	assert.match(nuxtConfig, /name:\s*cloudflareWorkerName/);
+	assert.match(nuxtConfig, /name:\s*'takumi'/);
+	assert.doesNotMatch(nuxtConfig, /WORKERS_CI_BRANCH/);
+	assert.doesNotMatch(nuxtConfig, /name:\s*'test-takumi'/);
 	assert.match(nuxtConfig, /preview_urls:\s*true/);
 	assert.match(nuxtConfig, /logpush:\s*true/);
 	assert.match(nuxtConfig, /observability:\s*\{/);

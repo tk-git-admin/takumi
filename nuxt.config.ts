@@ -8,10 +8,6 @@ const PREVIEW_HOSTNAMES = basicAuthPreviewHostnames
 			.map((hostname) => hostname.trim())
 			.filter(Boolean)
 	: [];
-const cloudflareWorkerName =
-	process.env.NUXT_CLOUDFLARE_WORKER_NAME ||
-	process.env.CLOUDFLARE_WORKER_NAME ||
-	(process.env.WORKERS_CI_BRANCH === 'test' ? 'test-takumi' : 'takumi');
 
 export default defineNuxtConfig({
 	compatibilityDate: '2026-06-08',
@@ -56,7 +52,7 @@ export default defineNuxtConfig({
 			deployConfig: true,
 			nodeCompat: true,
 			wrangler: {
-				name: cloudflareWorkerName,
+				name: 'takumi',
 				preview_urls: true,
 				observability: {
 					enabled: true,
