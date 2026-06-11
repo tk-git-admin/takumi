@@ -44,6 +44,14 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
 	const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+	const mainWorkflow = await readFile(
+		new URL('../.github/workflows/deploy-main.yml', import.meta.url),
+		'utf8',
+	);
+	const stagingWorkflow = await readFile(
+		new URL('../.github/workflows/deploy-staging.yml', import.meta.url),
+		'utf8',
+	);
 
 	assert.equal(Object.hasOwn(pkg.scripts, 'postbuild'), false);
 	assert.equal(pkg.scripts.deploy, 'npx wrangler --cwd .output deploy');
@@ -54,7 +62,11 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 	assert.match(readme, /Version command:\s*npx wrangler versions upload$/m);
 	assert.match(readme, /`test-takumi\.bridge-asia\.workers\.dev`/);
 	assert.match(readme, /branch preview alias for the `takumi` Worker/);
-	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
+	assert.match(readme, /Wrangler 4\.21\.0\+ is required/);
+	assert.equal(pkg.devDependencies.wrangler, '4.24.0');
+	assert.match(pkg.volta.node, /^20\./);
+	assert.match(mainWorkflow, /node-version:\s*'20\./);
+	assert.match(stagingWorkflow, /node-version:\s*'20\./);
 	assert.equal(await exists(new URL('../wrangler.jsonc', import.meta.url)), false);
 	assert.equal(
 		await exists(new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)),
