@@ -51,6 +51,17 @@ export default defineNuxtConfig({
 		cloudflare: {
 			deployConfig: true,
 			nodeCompat: true,
+			wrangler: {
+				name: 'takumi',
+				preview_urls: true,
+				observability: {
+					enabled: true,
+					logs: {
+						enabled: true,
+					},
+				},
+				logpush: true,
+			},
 		},
 	},
 	modules: ['@nuxtjs/i18n', '@pinia/nuxt', '@nuxtjs/tailwindcss', 'nuxt-icon'],

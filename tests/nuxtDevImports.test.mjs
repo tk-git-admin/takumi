@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, readdir, readFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
 
 async function exists(path) {
@@ -42,51 +40,40 @@ test('package import aliases do not override Nuxt package imports', async () => 
 	assert.equal(Object.hasOwn(pkg, 'imports'), false);
 });
 
-test('Cloudflare Worker deploy helper targets branch-prefixed staging Workers', async () => {
-	const { buildWranglerArgs, resolveWorkerName } = await import(
-		new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)
-	);
-
-	assert.equal(resolveWorkerName({ WORKERS_CI_BRANCH: 'main' }), 'takumi');
-	assert.equal(resolveWorkerName({ WORKERS_CI_BRANCH: 'test' }), 'test-takumi');
-	assert.equal(
-		resolveWorkerName({ WORKERS_CI_BRANCH: 'feature/seibu fair' }),
-		'feature-seibu-fair-takumi',
-	);
-	assert.deepEqual(buildWranglerArgs(['deploy', '--dry-run'], { WORKERS_CI_BRANCH: 'test' }), [
-		'wrangler@3.114.17',
-		'--cwd',
-		'.output',
-		'deploy',
-		'--dry-run',
-		'--name',
-		'test-takumi',
-	]);
-});
-
-test('Cloudflare Worker deployment config is versioned with the app', async () => {
+test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async () => {
 	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
-	const wranglerConfig = JSON.parse(
-		await readFile(new URL('../wrangler.jsonc', import.meta.url), 'utf8'),
-	);
 
-	assert.equal(pkg.scripts.postbuild, 'node scripts/write-cloudflare-wrangler-config.mjs');
-	assert.equal(pkg.scripts.deploy, 'node scripts/deploy-cloudflare-worker.mjs deploy');
-	assert.equal(pkg.scripts['deploy:preview'], 'node scripts/deploy-cloudflare-worker.mjs deploy');
+	assert.equal(Object.hasOwn(pkg.scripts, 'postbuild'), false);
+	assert.equal(pkg.scripts.deploy, 'npx wrangler --cwd .output deploy');
+	assert.equal(pkg.scripts['deploy:preview'], 'npx wrangler --cwd .output deploy --name test-takumi');
 	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
-	assert.equal(wranglerConfig.name, 'takumi');
-	assert.equal(wranglerConfig.main, './.output/server/index.mjs');
-	assert.deepEqual(wranglerConfig.compatibility_flags, ['nodejs_compat', 'no_nodejs_compat_v2']);
-	assert.equal(wranglerConfig.preview_urls, true);
-	assert.deepEqual(wranglerConfig.assets, {
-		binding: 'ASSETS',
-		directory: './.output/public',
-	});
+	assert.equal(await exists(new URL('../wrangler.jsonc', import.meta.url)), false);
+	assert.equal(await exists(new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)), false);
+	assert.equal(
+		await exists(new URL('../scripts/write-cloudflare-wrangler-config.mjs', import.meta.url)),
+		false,
+	);
 	assert.match(nuxtConfig, /compatibilityDate:\s*'2026-06-08'/);
 	assert.match(nuxtConfig, /preset:\s*'cloudflare_module'/);
 	assert.match(nuxtConfig, /deployConfig:\s*true/);
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
+	assert.match(nuxtConfig, /wrangler:\s*\{/);
+	assert.match(nuxtConfig, /name:\s*'takumi'/);
+	assert.match(nuxtConfig, /preview_urls:\s*true/);
+	assert.match(nuxtConfig, /logpush:\s*true/);
+	assert.match(nuxtConfig, /observability:\s*\{/);
+	assert.doesNotMatch(nuxtConfig, /env:\s*\{/);
+});
+
+test('Basic Auth environment documentation uses server-only Cloudflare variables', async () => {
+	const envExample = await readFile(new URL('../.env.example', import.meta.url), 'utf8');
+
+	assert.match(envExample, /^NUXT_BASIC_AUTH_USERNAME=/m);
+	assert.match(envExample, /^NUXT_BASIC_AUTH_PASSWORD=/m);
+	assert.match(envExample, /^NUXT_BASIC_AUTH_ENABLED=false/m);
+	assert.match(envExample, /^NUXT_BASIC_AUTH_PREVIEW_HOSTNAMES=/m);
+	assert.doesNotMatch(envExample, /^NUXT_PUBLIC_BASIC_AUTH_/m);
 });
 
 test('Basic Auth middleware follows the Cloudflare Worker runtime-env pattern', async () => {
@@ -115,39 +102,4 @@ test('Basic Auth middleware follows the Cloudflare Worker runtime-env pattern', 
 	assert.match(middleware, /getRequestHeader\(event,\s*['"]x-forwarded-host['"]\)/);
 	assert.match(middleware, /WWW-Authenticate/);
 	assert.match(middleware, /Basic realm="Protected"/);
-});
-
-test('Basic Auth environment documentation uses server-only Cloudflare variables', async () => {
-	const envExample = await readFile(new URL('../.env.example', import.meta.url), 'utf8');
-
-	assert.match(envExample, /^NUXT_BASIC_AUTH_USERNAME=/m);
-	assert.match(envExample, /^NUXT_BASIC_AUTH_PASSWORD=/m);
-	assert.match(envExample, /^NUXT_BASIC_AUTH_ENABLED=false/m);
-	assert.match(envExample, /^NUXT_BASIC_AUTH_PREVIEW_HOSTNAMES=/m);
-	assert.doesNotMatch(envExample, /^NUXT_PUBLIC_BASIC_AUTH_/m);
-});
-
-test('postbuild writes Wrangler config for Cloudflare dashboard deploy command', async () => {
-	const { writeWranglerConfig } = await import(
-		new URL('../scripts/write-cloudflare-wrangler-config.mjs', import.meta.url)
-	);
-	const outputDir = await mkdtemp(join(tmpdir(), 'takumi-wrangler-'));
-
-	try {
-		await mkdir(join(outputDir, 'server'), { recursive: true });
-		await mkdir(join(outputDir, 'public'), { recursive: true });
-		await writeFile(join(outputDir, 'server/index.mjs'), '');
-
-		await writeWranglerConfig(outputDir);
-
-		const config = await readFile(join(outputDir, 'wrangler.toml'), 'utf8');
-		assert.match(config, /name = "takumi"/);
-		assert.match(config, /main = "server\/index\.mjs"/);
-		assert.match(config, /compatibility_flags = \["nodejs_compat", "no_nodejs_compat_v2"\]/);
-		assert.match(config, /preview_urls = true/);
-		assert.match(config, /\[assets\]\nbinding = "ASSETS"\ndirectory = "public"/);
-		assert.doesNotMatch(config, /\[site\]/);
-	} finally {
-		await rm(outputDir, { recursive: true, force: true });
-	}
 });

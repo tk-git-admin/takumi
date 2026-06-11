@@ -3,9 +3,8 @@
 	"private": true,
 	"scripts": {
 		"build": "nuxt build",
-		"postbuild": "node scripts/write-cloudflare-wrangler-config.mjs",
-		"deploy": "node scripts/deploy-cloudflare-worker.mjs deploy",
-		"deploy:preview": "node scripts/deploy-cloudflare-worker.mjs deploy",
+		"deploy": "npx wrangler --cwd .output deploy",
+		"deploy:preview": "npx wrangler --cwd .output deploy --name test-takumi",
 		"dev": "volta run --node 18.19.0 nuxt dev",
 		"preview": "nuxt preview",
 		"start": "node .output/server/index.mjs",
