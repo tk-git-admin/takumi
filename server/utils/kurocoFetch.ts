@@ -26,7 +26,10 @@ function getKurocoConfig() {
 
 export function getRequestLocale(event: Parameters<typeof getQuery>[0]) {
 	try {
-		return normalizeLocale(getQuery(event).lang);
+		const queryLocale = getQuery(event).lang;
+		const locale = Array.isArray(queryLocale) ? queryLocale[0] : queryLocale;
+
+		return normalizeLocale(typeof locale === 'string' ? locale : undefined);
 	} catch (error) {
 		throw createError({
 			statusCode: 400,
@@ -40,18 +43,21 @@ async function fetchKurocoContent(event: Parameters<typeof getQuery>[0], content
 	return await $fetch<Record<string, unknown>>(url);
 }
 
-export async function fetchKurocoDetails(event: Parameters<typeof getQuery>[0], contentType: ContentType) {
+export async function fetchKurocoDetails(
+	event: Parameters<typeof getQuery>[0],
+	contentType: ContentType,
+) {
 	return normalizeDetailsResponse(await fetchKurocoContent(event, contentType));
 }
 
-export async function fetchKurocoList(event: Parameters<typeof getQuery>[0], contentType: ContentType) {
+export async function fetchKurocoList(
+	event: Parameters<typeof getQuery>[0],
+	contentType: ContentType,
+) {
 	return normalizeListResponse(await fetchKurocoContent(event, contentType));
 }
 
-export async function fetchKurocoNewsDetails(
-	event: Parameters<typeof getQuery>[0],
-	slug: string,
-) {
+export async function fetchKurocoNewsDetails(event: Parameters<typeof getQuery>[0], slug: string) {
 	if (!isValidSlug(slug)) {
 		throw createError({
 			statusCode: 400,

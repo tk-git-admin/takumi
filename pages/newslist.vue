@@ -45,10 +45,14 @@
 
 <script lang="ts" setup>
 import { useNews } from '~/store/news';
-import { useHome } from '~/store/home';
 import { useI18n } from 'vue-i18n';
 const { locale, t } = useI18n();
 const newsList = useNews();
+
+function localePath(location: { path: string }) {
+	const path = location.path.replace(/^\.\.\//, '/').replace(/^([^/])/, '/$1');
+	return locale.value === 'ja' ? `/ja${path}` : path;
+}
 
 function getNewsList() {
 	return newsList.getNews(locale.value);
@@ -59,6 +63,6 @@ useSeoMeta({
 	description: t('seo.description'),
 	ogDescription: t('seo.ogDescription'),
 	ogImage: '/img/takumi-ogp.png',
-	twitterCard: t('seo.twitterCard'),
+	twitterCard: t('seo.twitterCard') as 'summary' | 'summary_large_image' | 'app' | 'player',
 });
 </script>

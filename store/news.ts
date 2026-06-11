@@ -1,4 +1,5 @@
-import { Ref, ref } from 'vue';
+import { ref } from 'vue';
+import type { Ref } from 'vue';
 import { defineStore } from 'pinia';
 
 enum LANG {
@@ -7,8 +8,8 @@ enum LANG {
 }
 
 interface News {
-	en_list: [];
-	ja_list: [];
+	en_list: Array<Record<string, any>>;
+	ja_list: Array<Record<string, any>>;
 	myRef: Ref<string>;
 }
 
@@ -19,8 +20,8 @@ export const useNews = defineStore('news', {
 		myRef: ref('newsList'),
 	}),
 	actions: {
-		getNews(lang: string) {
-			let selectedLang;
+		getNews(lang: string): Array<Record<string, any>> {
+			let selectedLang: Array<Record<string, any>> = [];
 			switch (lang) {
 				case LANG.EN:
 					selectedLang = this.en_list;

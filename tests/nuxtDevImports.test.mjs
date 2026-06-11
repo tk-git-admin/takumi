@@ -43,13 +43,24 @@ test('package import aliases do not override Nuxt package imports', async () => 
 test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async () => {
 	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 	const nuxtConfig = await readFile(new URL('../nuxt.config.ts', import.meta.url), 'utf8');
+	const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
 
 	assert.equal(Object.hasOwn(pkg.scripts, 'postbuild'), false);
 	assert.equal(pkg.scripts.deploy, 'npx wrangler --cwd .output deploy');
-	assert.equal(pkg.scripts['deploy:preview'], 'npx wrangler --cwd .output deploy --name test-takumi');
+	assert.equal(
+		pkg.scripts['deploy:preview'],
+		'npx wrangler --cwd .output deploy --name test-takumi',
+	);
+	assert.match(readme, /Root directory:\s*\/$/m);
+	assert.match(readme, /Build command:\s*npm run build$/m);
+	assert.match(readme, /Deploy command:\s*npx wrangler --cwd \.output deploy$/m);
+	assert.match(readme, /Version command:\s*npx wrangler versions upload$/m);
 	assert.equal(pkg.devDependencies.wrangler, '3.114.17');
 	assert.equal(await exists(new URL('../wrangler.jsonc', import.meta.url)), false);
-	assert.equal(await exists(new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)), false);
+	assert.equal(
+		await exists(new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)),
+		false,
+	);
 	assert.equal(
 		await exists(new URL('../scripts/write-cloudflare-wrangler-config.mjs', import.meta.url)),
 		false,

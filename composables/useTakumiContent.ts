@@ -6,11 +6,11 @@ import { useProducts } from '~/store/products';
 type LocaleCode = 'en' | 'ja';
 
 type DetailsResponse = {
-	details: Record<string, unknown> | null;
+	details: Record<string, any> | null;
 };
 
 type ListResponse = {
-	list: unknown[];
+	list: Array<Record<string, any>>;
 };
 
 const locales: LocaleCode[] = ['en', 'ja'];

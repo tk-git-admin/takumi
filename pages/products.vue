@@ -88,20 +88,23 @@ function getProductsList() {
 	return productsList.getProducts(locale.value);
 }
 
-function formatPrice(price) {
+function formatPrice(price: string | number) {
 	return `RM${formatNumber(price)}`;
 }
 
-function calculateDiscount(sellingPrice, retailPrice) {
-	if (parseFloat(sellingPrice) < parseFloat(retailPrice)) {
-		const discountPercentage = (((retailPrice - sellingPrice) / retailPrice) * 100).toFixed(0);
+function calculateDiscount(sellingPrice: string | number, retailPrice: string | number) {
+	const selling = Number.parseFloat(String(sellingPrice));
+	const retail = Number.parseFloat(String(retailPrice));
+
+	if (selling < retail && retail > 0) {
+		const discountPercentage = (((retail - selling) / retail) * 100).toFixed(0);
 		return `${discountPercentage}`;
 	}
 	return '';
 }
 
-function formatNumber(number) {
-	return parseFloat(number).toFixed(2);
+function formatNumber(number: string | number) {
+	return Number.parseFloat(String(number)).toFixed(2);
 }
 useSeoMeta({
 	title: t('seo.title'),
@@ -109,7 +112,7 @@ useSeoMeta({
 	description: t('seo.description'),
 	ogDescription: t('seo.ogDescription'),
 	ogImage: '/img/takumi-ogp.png',
-	twitterCard: t('seo.twitterCard'),
+	twitterCard: t('seo.twitterCard') as 'summary' | 'summary_large_image' | 'app' | 'player',
 });
 </script>
 

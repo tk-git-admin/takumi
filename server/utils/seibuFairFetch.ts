@@ -73,10 +73,7 @@ async function fetchSeibuFairWorkshops(config: Record<string, unknown>, locale: 
 	}
 }
 
-export async function fetchSeibuReservationCounts(
-	config: Record<string, unknown>,
-	locale = 'en',
-) {
+export async function fetchSeibuReservationCounts(config: Record<string, unknown>, locale = 'en') {
 	const listPath = runtimeString(config, 'kurocoSeibuReservationListPath');
 
 	if (!listPath) {
@@ -84,10 +81,13 @@ export async function fetchSeibuReservationCounts(
 	}
 
 	try {
-		const response = await $fetch<Record<string, unknown>>(buildKurocoUrl(config, listPath, locale), {
-			headers: getKurocoHeaders(config),
-		});
-		return aggregateReservationParticipants(response);
+		const response = await $fetch<Record<string, unknown>>(
+			buildKurocoUrl(config, listPath, locale),
+			{
+				headers: getKurocoHeaders(config),
+			},
+		);
+		return aggregateReservationParticipants(response as any);
 	} catch {
 		return {};
 	}
@@ -98,7 +98,9 @@ export async function fetchSeibuFairEvent(
 	localeOverride?: unknown,
 ) {
 	const config = useRuntimeConfig();
-	const locale = String(localeOverride || getRequestLocale(event)).toLowerCase().startsWith('ja')
+	const locale = String(localeOverride || getRequestLocale(event))
+		.toLowerCase()
+		.startsWith('ja')
 		? 'ja'
 		: 'en';
 	const [content, workshops, reservationCounts] = await Promise.all([

@@ -58,15 +58,16 @@ npm run build
 npm run deploy
 ```
 
-Cloudflare Workers Builds should deploy from Nitro's generated `.output` directory:
+Cloudflare Workers Builds should use these settings:
 
 ```text
+Root directory: /
 Build command: npm run build
-Deploy command: npm run deploy
-Test environment deploy command: npm run deploy:preview
+Deploy command: npx wrangler --cwd .output deploy
+Version command: npx wrangler versions upload
 ```
 
-`npm run build` lets Nitro generate the Cloudflare Wrangler deployment config under `.output/server/wrangler.json`, and `npm run deploy` runs Wrangler with `--cwd .output` so the generated output is deployed. Production deploys the `takumi` Worker. The `deploy:preview` script deploys the same generated output with an explicit `--name test-takumi` override for `test.takumi.com.my`.
+`npm run build` lets Nitro generate the Cloudflare Wrangler deployment config under `.output/server/wrangler.json`. The deploy command runs Wrangler with `--cwd .output` so the generated output is deployed. The version command runs from the repository root and follows Nitro's generated `.wrangler/deploy/config.json` redirect to the same generated Worker config. Production deploys the `takumi` Worker. The local `deploy:preview` script deploys the same generated output with an explicit `--name test-takumi` override for `test.takumi.com.my`.
 
 Required Worker variables and secrets should be configured in Cloudflare without committing secret values. The app reads Basic Auth and Kuroco values from server-only runtime config or Cloudflare runtime bindings.
 
