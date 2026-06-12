@@ -14,10 +14,7 @@ import {
 test('SEIBU fair event data uses the approved frontend scope', () => {
 	assert.equal(seibuFairEvent.route, '/seibu-fair');
 	assert.equal(seibuFairEvent.dates.year, 2026);
-	assert.equal(
-		seibuFairEvent.posterAsset.src,
-		'/img/seibu-fair/seibu-panora-june-final.jpeg',
-	);
+	assert.equal(seibuFairEvent.posterAsset.src, '/img/seibu-fair/seibu-panora-june-final.jpeg');
 	assert.equal(seibuFairEvent.stats.exhibitors, 15);
 	assert.equal(seibuFairEvent.stats.products, 50);
 	assert.equal(seibuFairEvent.stats.experiences, 4);
@@ -50,7 +47,10 @@ test('SEIBU fair company descriptions render while product data stays minimal', 
 		seibuFairEvent.exhibitors.every((exhibitor) => exhibitor.description?.length > 24),
 		true,
 	);
-	assert.equal(seibuFairEvent.productAssets.every((asset) => !asset.description), true);
+	assert.equal(
+		seibuFairEvent.productAssets.every((asset) => !asset.description),
+		true,
+	);
 
 	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
 	assert.equal(pageSource.includes('asset.description'), false);
@@ -160,8 +160,10 @@ test('SEIBU event page uses existing design-system buttons and internal APIs', a
 	assert.equal(pageSource.includes('Dummy product information'), false);
 	assert.equal(pageSource.includes('seibu-reserve-button'), false);
 	assert.equal(pageSource.includes('class="btn btn-primary'), true);
+	assert.equal(pageSource.includes('heroLogo.src'), true);
+	assert.equal(pageSource.includes('seibu-hero-logo'), true);
 	assert.equal(pageSource.includes('@click.prevent="scrollToRegistration"'), true);
-	assert.equal(pageSource.includes("scrollIntoView"), true);
+	assert.equal(pageSource.includes('scrollIntoView'), true);
 	assert.equal(pageSource.includes('class="tabs tabs-boxed'), true);
 	assert.equal(pageSource.includes('role="tablist"'), true);
 	assert.equal(pageSource.includes('tab-active'), true);

@@ -63,14 +63,14 @@ test('SEIBU flat Kuroco content fields are mapped into the event shape', () => {
 				hero_title: 'CMS Hero Title',
 				hero_subheading: 'CMS Craft',
 				hero_description: 'CMS intro copy.',
+				hero_logo: {
+					url: 'https://cdn.example.test/logo.svg',
+					desc: 'CMS logo',
+				},
 				highlighted_title: ['16', '51', '5'],
 				highlighted_sub_heading: ['Companies', 'Exhibits', 'Hands-on events'],
 				event_heading: ['Date', 'Venue', 'Admission'],
-				event_description: [
-					'June 19-30, 2026',
-					'CMS Event Hall',
-					'Free admission',
-				],
+				event_description: ['June 19-30, 2026', 'CMS Event Hall', 'Free admission'],
 				hero_image: {
 					url: 'https://cdn.example.test/poster.jpeg',
 					desc: 'CMS poster',
@@ -101,6 +101,10 @@ test('SEIBU flat Kuroco content fields are mapped into the event shape', () => {
 	assert.equal(normalized.title, 'CMS Hero Title');
 	assert.equal(normalized.subtitle, 'CMS Craft');
 	assert.equal(normalized.intro, 'CMS intro copy.');
+	assert.deepEqual(normalized.heroLogo, {
+		name: 'CMS logo',
+		src: 'https://cdn.example.test/logo.svg',
+	});
 	assert.equal(normalized.dates.range, 'June 19-30, 2026');
 	assert.equal(normalized.venue, 'CMS Event Hall');
 	assert.equal(normalized.admission, 'Free admission');
@@ -143,16 +147,10 @@ test('SEIBU workshop Kuroco fields are mapped into registration experiences', ()
 				subject: 'Origami',
 				slug: 'origami',
 				workshop_heading: 'Origami Workshop',
-				workshop_description:
-					'A hands-on origami class for children and adults.',
+				workshop_description: 'A hands-on origami class for children and adults.',
 				session_time: '15:00-16:00',
 				session_booking: '15',
-				session_date: [
-					'June 20 (Sat)',
-					'June 21 (Sun)',
-					'June 27 (Sat)',
-					'June 28 (Sun)',
-				],
+				session_date: ['June 20 (Sat)', 'June 21 (Sun)', 'June 27 (Sat)', 'June 28 (Sun)'],
 			},
 			{
 				topics_id: 53,
