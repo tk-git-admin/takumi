@@ -63,11 +63,11 @@ Cloudflare Workers Builds should use these settings:
 ```text
 Root directory: /
 Build command: npm run build
-Deploy command: npx wrangler --cwd .output deploy
+Deploy command: npm run deploy
 Version command: npx wrangler versions upload
 ```
 
-`npm run build` lets Nitro generate the Cloudflare Wrangler deployment config under `.output/server/wrangler.json`. The deploy command runs Wrangler with `--cwd .output` so the generated output is deployed. The version command runs from the repository root and follows Nitro's generated `.wrangler/deploy/config.json` redirect to the same generated Worker config. Production deploys the `takumi` Worker. `test-takumi.bridge-asia.workers.dev` is the `test` branch preview alias for the `takumi` Worker, not a separate Worker name. Wrangler 4.21.0+ is required for Cloudflare Workers Builds to create the branch preview alias.
+`npm run build` lets Nitro generate the Cloudflare Wrangler deployment config under `.output/server/wrangler.json`. `npm run deploy` runs Wrangler with `--cwd .output` so the generated output is deployed. The version command runs from the repository root and follows Nitro's generated `.wrangler/deploy/config.json` redirect to the same generated Worker config. Production deploys the `takumi` Worker. `test-takumi.bridge-asia.workers.dev` is the `test` branch preview alias for the `takumi` Worker, not a separate Worker name. Wrangler 4.21.0+ is required for Cloudflare Workers Builds to create the branch preview alias.
 
 Required Worker variables and secrets should be configured in Cloudflare without committing secret values. The app reads Basic Auth and Kuroco values from server-only runtime config or Cloudflare runtime bindings.
 

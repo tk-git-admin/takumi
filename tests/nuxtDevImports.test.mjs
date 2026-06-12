@@ -66,6 +66,15 @@ test('package import aliases do not override Nuxt package imports', async () => 
 	assert.equal(Object.hasOwn(pkg, 'imports'), false);
 });
 
+test('reusable skills submodule uses the GitHub Actions-compatible sibling URL', async () => {
+	const gitmodules = await readFile(new URL('../.gitmodules', import.meta.url), 'utf8');
+
+	assert.match(gitmodules, /\[submodule "docs\/skills"\]/);
+	assert.match(gitmodules, /^\s*path = docs\/skills$/m);
+	assert.match(gitmodules, /^\s*url = \.\.\/reusable-patterns\.git$/m);
+	assert.doesNotMatch(gitmodules, /https:\/\/github\.com\/tk-git-admin\/reusable-patterns\.git/);
+});
+
 test('public image URLs use bound src attributes to avoid Nuxt dev virtual public imports', async () => {
 	const vueFileRoots = [
 		new URL('../pages/', import.meta.url),
@@ -121,15 +130,27 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 	assert.equal(Object.hasOwn(pkg.scripts, 'deploy:preview'), false);
 	assert.match(readme, /Root directory:\s*\/$/m);
 	assert.match(readme, /Build command:\s*npm run build$/m);
-	assert.match(readme, /Deploy command:\s*npx wrangler --cwd \.output deploy$/m);
+	assert.match(readme, /Deploy command:\s*npm run deploy$/m);
 	assert.match(readme, /Version command:\s*npx wrangler versions upload$/m);
 	assert.match(readme, /`test-takumi\.bridge-asia\.workers\.dev`/);
 	assert.match(readme, /branch preview alias for the `takumi` Worker/);
 	assert.match(readme, /Wrangler 4\.21\.0\+ is required/);
 	assert.equal(pkg.devDependencies.wrangler, '4.24.0');
 	assert.match(pkg.volta.node, /^20\./);
+	assert.match(mainWorkflow, /uses:\s*actions\/checkout@v6/);
+	assert.match(stagingWorkflow, /uses:\s*actions\/checkout@v6/);
+	assert.match(mainWorkflow, /uses:\s*actions\/setup-node@v6/);
+	assert.match(stagingWorkflow, /uses:\s*actions\/setup-node@v6/);
+	assert.match(mainWorkflow, /uses:\s*actions\/upload-artifact@v7/);
+	assert.match(stagingWorkflow, /uses:\s*actions\/upload-artifact@v7/);
 	assert.match(mainWorkflow, /node-version:\s*'20\./);
 	assert.match(stagingWorkflow, /node-version:\s*'20\./);
+	assert.match(mainWorkflow, /submodules:\s*false/);
+	assert.match(stagingWorkflow, /submodules:\s*false/);
+	assert.doesNotMatch(mainWorkflow, /submodules:\s*true/);
+	assert.doesNotMatch(stagingWorkflow, /submodules:\s*true/);
+	assert.match(mainWorkflow, /include-hidden-files:\s*true/);
+	assert.match(stagingWorkflow, /include-hidden-files:\s*true/);
 	assert.equal(await exists(new URL('../wrangler.jsonc', import.meta.url)), false);
 	assert.equal(
 		await exists(new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)),
@@ -140,10 +161,17 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 		false,
 	);
 	assert.match(nuxtConfig, /compatibilityDate:\s*'2026-06-08'/);
-	assert.match(nuxtConfig, /preset:\s*'cloudflare_module'/);
+	assert.match(
+		nuxtConfig,
+		/const isCloudflarePagesBuild = Boolean\(process\.env\.CF_PAGES_BUILD\)/,
+	);
+	assert.match(
+		nuxtConfig,
+		/preset:\s*isCloudflarePagesBuild \? 'cloudflare_pages' : 'cloudflare_module'/,
+	);
 	assert.match(nuxtConfig, /deployConfig:\s*true/);
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
-	assert.match(nuxtConfig, /wrangler:\s*\{/);
+	assert.match(nuxtConfig, /wrangler:\s*isCloudflarePagesBuild\s*\?\s*undefined\s*:\s*\{/);
 	assert.match(nuxtConfig, /name:\s*'takumi'/);
 	assert.doesNotMatch(nuxtConfig, /WORKERS_CI_BRANCH/);
 	assert.doesNotMatch(nuxtConfig, /name:\s*'test-takumi'/);
