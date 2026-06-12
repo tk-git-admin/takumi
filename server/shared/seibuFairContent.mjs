@@ -110,10 +110,7 @@ function asOptionalInteger(value) {
 function readImageSource(value) {
 	if (isRecord(value)) {
 		return (
-			asString(value.url) ||
-			asString(value.url_org) ||
-			asString(value.src) ||
-			asString(value.path)
+			asString(value.url) || asString(value.url_org) || asString(value.src) || asString(value.path)
 		);
 	}
 
@@ -140,6 +137,7 @@ function hasFlatSeibuFields(candidate) {
 			asString(readField(candidate, 'hero_host')) ||
 			asList(readField(candidate, 'company_title')).length ||
 			asList(readField(candidate, 'product_title')).length ||
+			readImageSource(readField(candidate, 'hero_logo')) ||
 			readImageSource(readField(candidate, 'hero_image')),
 	);
 }
@@ -305,8 +303,9 @@ function readWorkshopItems(source) {
 	const list = readField(source, 'list');
 	if (Array.isArray(list)) return list.filter((item) => isRecord(item) && hasWorkshopFields(item));
 
-	return [readField(source, 'details'), source]
-		.filter((item) => isRecord(item) && hasWorkshopFields(item));
+	return [readField(source, 'details'), source].filter(
+		(item) => isRecord(item) && hasWorkshopFields(item),
+	);
 }
 
 function mapWorkshopExperiences(source) {
@@ -314,7 +313,9 @@ function mapWorkshopExperiences(source) {
 		.map((item, index) => {
 			const fallbackId = `workshop-${asString(readField(item, 'topics_id')) || index + 1}`;
 			const id = slugifyId(
-				readField(item, 'slug') || readField(item, 'subject') || readField(item, 'workshop_heading'),
+				readField(item, 'slug') ||
+					readField(item, 'subject') ||
+					readField(item, 'workshop_heading'),
 				fallbackId,
 			);
 			const time = asString(readField(item, 'session_time'));
@@ -355,6 +356,7 @@ function readFlatSeibuEvent(source) {
 		asList(readField(item, 'event_heading')),
 		asList(readField(item, 'event_description')),
 	);
+	const heroLogo = readField(item, 'hero_logo');
 	const heroImage = readField(item, 'hero_image');
 	const heroButton = readLink(readField(item, 'hero_button_link'));
 
@@ -364,6 +366,13 @@ function readFlatSeibuEvent(source) {
 		subtitle: asString(readField(item, 'hero_subheading')),
 		host: asString(readField(item, 'hero_host')),
 		intro: asString(readField(item, 'hero_description')),
+		heroLogo: {
+			name:
+				readImageName(heroLogo) ||
+				asString(readField(item, 'hero_title')) ||
+				asString(readField(item, 'subject')),
+			src: readImageSource(heroLogo),
+		},
 		companiesTitle: asString(readField(item, 'companies_title')),
 		featuredProductsTitle: asString(readField(item, 'featured_products_title')),
 		registrationTitle: asString(readField(item, 'experience_registration_title')),
@@ -403,12 +412,12 @@ function normalizeProductAssets(value, fallback) {
 		.filter((asset) => asset.name || asset.src || asset.description);
 }
 
-function normalizePosterAsset(value, fallback) {
+function normalizeImageAsset(value, fallback = {}) {
 	const source = isRecord(value) ? value : {};
 
 	return {
-		name: asString(source.name) || fallback.name,
-		src: asString(source.src) || fallback.src,
+		name: asString(source.name) || asString(fallback.name),
+		src: asString(source.src) || asString(fallback.src),
 	};
 }
 
@@ -491,8 +500,7 @@ export function normalizeSeibuEvent(event = seibuFairEvent, locale = 'en') {
 		companiesTitle: asString(source.companiesTitle) || asString(fallback.companiesTitle),
 		featuredProductsTitle:
 			asString(source.featuredProductsTitle) || asString(fallback.featuredProductsTitle),
-		registrationTitle:
-			asString(source.registrationTitle) || asString(fallback.registrationTitle),
+		registrationTitle: asString(source.registrationTitle) || asString(fallback.registrationTitle),
 		registrationDescription:
 			asString(source.registrationDescription) || asString(fallback.registrationDescription),
 		heroButton: {
@@ -516,7 +524,8 @@ export function normalizeSeibuEvent(event = seibuFairEvent, locale = 'en') {
 			...fallback.announcement,
 			...(isRecord(source.announcement) ? clone(source.announcement) : {}),
 		},
-		posterAsset: normalizePosterAsset(source.posterAsset, fallback.posterAsset),
+		heroLogo: normalizeImageAsset(source.heroLogo, fallback.heroLogo),
+		posterAsset: normalizeImageAsset(source.posterAsset, fallback.posterAsset),
 		productAssets: productAssets.length ? productAssets : fallback.productAssets,
 		exhibitors: exhibitors.length ? exhibitors : fallback.exhibitors,
 		experiences: experiences.length ? experiences : fallback.experiences,
@@ -539,10 +548,7 @@ export function normalizeSeibuEventSource(source, locale = 'en') {
 		);
 	}
 
-	return normalizeSeibuEvent(
-		getSeibuFairEvent(locale),
-		locale,
-	);
+	return normalizeSeibuEvent(getSeibuFairEvent(locale), locale);
 }
 
 export function mergeSeibuWorkshopSource(event = seibuFairEvent, source, locale = 'en') {
@@ -618,9 +624,7 @@ export function applyReservationAvailability(event, reservationCounts = {}) {
 
 export function findSeibuSession(event, experienceId, sessionId) {
 	const normalized = normalizeSeibuEvent(event);
-	const experience = normalized.experiences.find(
-		(item) => item.id === asString(experienceId),
-	);
+	const experience = normalized.experiences.find((item) => item.id === asString(experienceId));
 
 	if (!experience) return null;
 

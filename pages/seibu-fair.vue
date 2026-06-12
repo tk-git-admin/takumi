@@ -6,12 +6,21 @@
 					<div class="flex flex-col gap-5">
 						<p class="font-bold text-primary">{{ event.host }}</p>
 						<div>
-							<h1 class="text-4xl font-bold text-primary md:text-5xl">
-								{{ event.title }}
-							</h1>
-							<h2 class="mt-2 text-2xl font-bold text-secondary-500">
-								{{ event.subtitle }}
-							</h2>
+							<template v-if="heroLogo.src">
+								<h1 class="sr-only">{{ heroLogo.name || event.title }}</h1>
+								<img
+									:src="heroLogo.src"
+									:alt="heroLogo.name || event.title"
+									class="seibu-hero-logo" />
+							</template>
+							<template v-else>
+								<h1 class="text-4xl font-bold text-primary md:text-5xl">
+									{{ event.title }}
+								</h1>
+								<h2 class="mt-2 text-2xl font-bold text-secondary-500">
+									{{ event.subtitle }}
+								</h2>
+							</template>
 						</div>
 						<p v-if="event.intro" class="max-w-xl leading-7 text-secondary-500">
 							{{ event.intro }}
@@ -48,7 +57,10 @@
 						</div>
 
 						<div>
-							<a :href="heroButtonHref" class="btn btn-primary" @click.prevent="scrollToRegistration">
+							<a
+								:href="heroButtonHref"
+								class="btn btn-primary"
+								@click.prevent="scrollToRegistration">
 								{{ heroButtonTitle }}
 							</a>
 						</div>
@@ -365,6 +377,10 @@ const DEFAULT_POSTER_ASSET = {
 	name: '',
 	src: '/img/seibu-fair/seibu-panora-june-final.jpeg',
 };
+const DEFAULT_HERO_LOGO = {
+	name: '',
+	src: '',
+};
 const EMPTY_SEIBU_EVENT = {
 	route: '/seibu-fair',
 	title: '',
@@ -382,6 +398,7 @@ const EMPTY_SEIBU_EVENT = {
 	stats: { exhibitors: 0, products: 0, experiences: 0 },
 	heroButton: { url: '#registration', title: '' },
 	announcement: { to: '/seibu-fair', label: '', title: '', actionLabel: '' },
+	heroLogo: DEFAULT_HERO_LOGO,
 	posterAsset: DEFAULT_POSTER_ASSET,
 	productAssets: [],
 	exhibitors: [],
@@ -441,6 +458,13 @@ const posterAsset = computed(() => {
 	return {
 		name: asset.name || t('seibuFair.posterAlt'),
 		src: asset.src || DEFAULT_POSTER_ASSET.src,
+	};
+});
+const heroLogo = computed(() => {
+	const asset = event.value.heroLogo || DEFAULT_HERO_LOGO;
+	return {
+		name: asset.name || event.value.title,
+		src: asset.src || DEFAULT_HERO_LOGO.src,
 	};
 });
 const heroButtonHref = computed(() => event.value.heroButton?.url || '#registration');
@@ -627,6 +651,12 @@ useSeoMeta({
 	width: 100%;
 	max-height: 48rem;
 	object-fit: contain;
+}
+
+.seibu-hero-logo {
+	display: block;
+	width: min(100%, 28rem);
+	height: auto;
 }
 
 .seibu-stat-circle {
