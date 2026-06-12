@@ -1,3 +1,4 @@
+const isCloudflarePagesBuild = Boolean(process.env.CF_PAGES_BUILD);
 const siteUrl =
 	process.env.NUXT_PUBLIC_SITE_URL || 'https://takumi-international.g.kuroco-front.app/';
 const basicAuthPreviewHostnames =
@@ -47,21 +48,23 @@ export default defineNuxtConfig({
 	},
 	devtools: { enabled: true },
 	nitro: {
-		preset: 'cloudflare_module',
+		preset: isCloudflarePagesBuild ? 'cloudflare_pages' : 'cloudflare_module',
 		cloudflare: {
 			deployConfig: true,
 			nodeCompat: true,
-			wrangler: {
-				name: 'takumi',
-				preview_urls: true,
-				observability: {
-					enabled: true,
-					logs: {
-						enabled: true,
+			wrangler: isCloudflarePagesBuild
+				? undefined
+				: {
+						name: 'takumi',
+						preview_urls: true,
+						observability: {
+							enabled: true,
+							logs: {
+								enabled: true,
+							},
+						},
+						logpush: true,
 					},
-				},
-				logpush: true,
-			},
 		},
 	},
 	modules: ['@nuxtjs/i18n', '@pinia/nuxt', '@nuxtjs/tailwindcss', 'nuxt-icon'],

@@ -121,7 +121,7 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 	assert.equal(Object.hasOwn(pkg.scripts, 'deploy:preview'), false);
 	assert.match(readme, /Root directory:\s*\/$/m);
 	assert.match(readme, /Build command:\s*npm run build$/m);
-	assert.match(readme, /Deploy command:\s*npx wrangler --cwd \.output deploy$/m);
+	assert.match(readme, /Deploy command:\s*npm run deploy$/m);
 	assert.match(readme, /Version command:\s*npx wrangler versions upload$/m);
 	assert.match(readme, /`test-takumi\.bridge-asia\.workers\.dev`/);
 	assert.match(readme, /branch preview alias for the `takumi` Worker/);
@@ -140,10 +140,17 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 		false,
 	);
 	assert.match(nuxtConfig, /compatibilityDate:\s*'2026-06-08'/);
-	assert.match(nuxtConfig, /preset:\s*'cloudflare_module'/);
+	assert.match(
+		nuxtConfig,
+		/const isCloudflarePagesBuild = Boolean\(process\.env\.CF_PAGES_BUILD\)/,
+	);
+	assert.match(
+		nuxtConfig,
+		/preset:\s*isCloudflarePagesBuild \? 'cloudflare_pages' : 'cloudflare_module'/,
+	);
 	assert.match(nuxtConfig, /deployConfig:\s*true/);
 	assert.match(nuxtConfig, /nodeCompat:\s*true/);
-	assert.match(nuxtConfig, /wrangler:\s*\{/);
+	assert.match(nuxtConfig, /wrangler:\s*isCloudflarePagesBuild\s*\?\s*undefined\s*:\s*\{/);
 	assert.match(nuxtConfig, /name:\s*'takumi'/);
 	assert.doesNotMatch(nuxtConfig, /WORKERS_CI_BRANCH/);
 	assert.doesNotMatch(nuxtConfig, /name:\s*'test-takumi'/);
