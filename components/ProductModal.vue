@@ -56,7 +56,7 @@
 				>ORDER</a
 			>
 			<div class="close" @click="$emit('close-modal')">
-				<img class="close-img" src="/img/close-icon.svg" alt="" />
+				<img class="close-img" :src="'/img/close-icon.svg'" alt="" />
 			</div>
 		</div>
 	</div>

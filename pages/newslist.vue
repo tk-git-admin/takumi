@@ -24,7 +24,7 @@
 									class="lg:max-w-64 object-cover bg-base-100" />
 								<img
 									v-else
-									src="/img/takumi-ogp.png"
+									:src="'/img/takumi-ogp.png'"
 									alt="Default Image"
 									class="lg:max-w-64 object-cover bg-base-100" />
 								<div class="flex flex-col p-3">

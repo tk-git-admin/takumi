@@ -31,7 +31,7 @@
 				<div class="flex flex-col items-center w-full lg:flex-row">
 					<div class="grid flex-grow h-70 lg:w-96 card">
 						<div class="card-body">
-							<figure><img src="/img/features1.png" alt="Image" /></figure>
+							<figure><img :src="'/img/features1.png'" alt="Image" /></figure>
 							<h2 class="card-title justify-center text-primary">
 								{{ getHomeList().features[0].feature_title }}
 							</h2>
@@ -41,7 +41,7 @@
 					<div class="divider lg:divider-horizontal"></div>
 					<div class="grid flex-grow h-70 lg:w-96 card">
 						<div class="card-body">
-							<figure><img src="/img/features2.png " alt="Image" /></figure>
+							<figure><img :src="'/img/features2.png'" alt="Image" /></figure>
 							<h2 class="card-title justify-center text-primary">
 								{{ getHomeList().features[1].feature_title }}
 							</h2>
@@ -51,7 +51,7 @@
 					<div class="divider lg:divider-horizontal"></div>
 					<div class="grid flex-grow h-70 lg:w-96 card">
 						<div class="card-body">
-							<figure><img src="/img/features3.png" alt="Image" /></figure>
+							<figure><img :src="'/img/features3.png'" alt="Image" /></figure>
 							<h2 class="card-title justify-center text-primary">
 								{{ getHomeList().features[2].feature_title }}
 							</h2>
@@ -86,7 +86,7 @@
 										class="w-full h-full object-cover" />
 									<img
 										v-else
-										src="/img/takumi-ogp.png"
+										:src="'/img/takumi-ogp.png'"
 										alt="Default Image"
 										class="w-full h-full object-cover" />
 								</figure>
@@ -148,7 +148,7 @@
 						</div>
 					</div>
 					<div class="grid flex-grow h-70 lg:w-32">
-						<figure><img src="/img/malaysia-japan-flag.jpg " alt="Image" /></figure>
+						<figure><img :src="'/img/malaysia-japan-flag.jpg'" alt="Image" /></figure>
 					</div>
 				</div>
 			</div>

@@ -12,6 +12,32 @@ async function exists(path) {
 	}
 }
 
+async function collectVueFiles(directoryUrl) {
+	const entries = await readdir(directoryUrl, { withFileTypes: true });
+	const files = [];
+
+	for (const entry of entries) {
+		const entryUrl = new URL(entry.name + (entry.isDirectory() ? '/' : ''), directoryUrl);
+
+		if (entry.isDirectory()) {
+			files.push(...(await collectVueFiles(entryUrl)));
+		} else if (entry.name.endsWith('.vue')) {
+			files.push(entryUrl);
+		}
+	}
+
+	return files;
+}
+
+function lineNumber(source, index) {
+	return source.slice(0, index).split('\n').length;
+}
+
+function relativeFromProjectRoot(fileUrl) {
+	const projectRoot = new URL('../', import.meta.url).pathname;
+	return decodeURIComponent(fileUrl.pathname.replace(projectRoot, ''));
+}
+
 test('server-only Kuroco helpers are outside Nuxt top-level utils auto-imports', async () => {
 	assert.equal(await exists(new URL('../utils/contactValidation.mjs', import.meta.url)), false);
 	assert.equal(await exists(new URL('../utils/kurocoContent.mjs', import.meta.url)), false);
@@ -38,6 +64,43 @@ test('package import aliases do not override Nuxt package imports', async () => 
 	const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
 	assert.equal(Object.hasOwn(pkg, 'imports'), false);
+});
+
+test('public image URLs use bound src attributes to avoid Nuxt dev virtual public imports', async () => {
+	const vueFileRoots = [
+		new URL('../pages/', import.meta.url),
+		new URL('../components/', import.meta.url),
+		new URL('../layouts/', import.meta.url),
+	];
+	const vueFiles = [];
+
+	for (const root of vueFileRoots) {
+		if (await exists(root)) {
+			vueFiles.push(...(await collectVueFiles(root)));
+		}
+	}
+
+	const appVue = new URL('../app.vue', import.meta.url);
+	if (await exists(appVue)) {
+		vueFiles.push(appVue);
+	}
+
+	const staticPublicImagePattern = /<img\b[^>]*(?:^|\s)src=["']\/img\/[^"']*["'][^>]*>/g;
+	const violations = [];
+
+	for (const fileUrl of vueFiles) {
+		const source = await readFile(fileUrl, 'utf8');
+
+		for (const match of source.matchAll(staticPublicImagePattern)) {
+			violations.push(
+				`${relativeFromProjectRoot(fileUrl)}:${lineNumber(source, match.index)} ${match[0]
+					.replace(/\s+/g, ' ')
+					.trim()}`,
+			);
+		}
+	}
+
+	assert.deepEqual(violations, []);
 });
 
 test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async () => {
