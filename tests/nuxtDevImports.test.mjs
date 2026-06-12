@@ -66,6 +66,15 @@ test('package import aliases do not override Nuxt package imports', async () => 
 	assert.equal(Object.hasOwn(pkg, 'imports'), false);
 });
 
+test('reusable skills submodule uses the GitHub Actions-compatible sibling URL', async () => {
+	const gitmodules = await readFile(new URL('../.gitmodules', import.meta.url), 'utf8');
+
+	assert.match(gitmodules, /\[submodule "docs\/skills"\]/);
+	assert.match(gitmodules, /^\s*path = docs\/skills$/m);
+	assert.match(gitmodules, /^\s*url = \.\.\/reusable-patterns\.git$/m);
+	assert.doesNotMatch(gitmodules, /https:\/\/github\.com\/tk-git-admin\/reusable-patterns\.git/);
+});
+
 test('public image URLs use bound src attributes to avoid Nuxt dev virtual public imports', async () => {
 	const vueFileRoots = [
 		new URL('../pages/', import.meta.url),
@@ -130,6 +139,10 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 	assert.match(pkg.volta.node, /^20\./);
 	assert.match(mainWorkflow, /node-version:\s*'20\./);
 	assert.match(stagingWorkflow, /node-version:\s*'20\./);
+	assert.match(mainWorkflow, /submodules:\s*false/);
+	assert.match(stagingWorkflow, /submodules:\s*false/);
+	assert.doesNotMatch(mainWorkflow, /submodules:\s*true/);
+	assert.doesNotMatch(stagingWorkflow, /submodules:\s*true/);
 	assert.equal(await exists(new URL('../wrangler.jsonc', import.meta.url)), false);
 	assert.equal(
 		await exists(new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)),
