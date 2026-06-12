@@ -1,0 +1,148 @@
+{
+	"metaDescription": "マレーシアでソフトウェア開発、モバイルアプリ開発、ITアウトソーシングサービスを提供。日本企業のオフショア開発もサポートいたします。",
+	"links": {
+		"home": "ホーム",
+		"company": "会社概要",
+		"news": "ニュース",
+		"product": "取り扱い製品​",
+		"knives": "ナイフ",
+		"watches": "時計",
+		"service": "サービス",
+		"halal": "ハラールとは",
+		"contact": "お問い合わせ",
+		"development": "開発事例",
+		"language": "English",
+		"menu": "メニュー"
+	},
+	"seo": {
+		"title": "タクミ・インターナショナル株式会社",
+		"ogTitle": "タクミ・インターナショナル株式会社",
+		"description": "タクミ・インターナショナルは、最高級の日本製品や工芸品を輸入し、日本の最良のものをマレーシアにもたらします。当社の専門知識と品質製品でお客様のビジネスを向上させる信頼を寄せてください。また、ムスリム層を対象としたコンサルテーションビジネスも提供しています。",
+		"ogDescription": "タクミ・インターナショナルは、最高級の日本製品や工芸品を輸入し、日本の最良のものをマレーシアにもたらします。当社の専門知識と品質製品でお客様のビジネスを向上させる信頼を寄せてください。また、ムスリム層を対象としたコンサルテーションビジネスも提供しています。",
+		"twitterCard": "summary_large_image"
+	},
+	"hero": {
+		"button": "詳細を見る"
+	},
+	"contact": {
+		"title": "お問い合わせ",
+		"subtitle": "",
+		"titlePrompt": "メッセージを送る",
+		"namePrompt": "お名前",
+		"nameHint": "名前を入力してください",
+		"emailPrompt": "メールアドレス",
+		"messagePrompt": "メッセージ",
+		"messageHint": "どのようなご用件でしょうか？",
+		"sendButton": "送信",
+		"form": {
+			"success": "ご送信ありがとうございます。メッセージを受け取りました。近日中にご連絡いたします。",
+			"error": "サーバーに接続できませんでした。後でもう一度お試しください。",
+			"empty": "必須項目をすべて入力してください。",
+			"email": "有効なメールアドレスを入力してください。"
+		}
+	},
+	"product": {
+		"order": "注文",
+		"soldout": "売れ切り",
+		"view": "詳しく見る"
+	},
+	"topBanner": {
+		"title": "CASIO G-SHOCK時計",
+		"detail1": "日本からG-Shockを購入するための信頼できるマレーシアのマーケットプレイス",
+		"detail2": "\"BELI G-SHOCK ORI、ローカルマレーシアセラー\""
+	},
+	"knivesBanner": {
+		"title": "由宗刃物",
+		"detail": "マレーシアで高品質な日本のキッチンナイフを購入するための信頼できる場所"
+	},
+	"getStarted": {
+		"title": "さあ、はじめましょう。​",
+		"subtitle": "日本で買いたい商品を探すなら、私たちにお任せください。​"
+	},
+	"corporate": {
+		"title": "会社情報",
+		"name": "会社名​",
+		"address": "所在地",
+		"manager": "代表取締役",
+		"phone": "電話番号",
+		"registration": "会社登記番号",
+		"establishment": "設立日"
+	},
+	"news": {
+		"title": "最新ニュース",
+		"view": "見る",
+		"more": "もっと見る"
+	},
+	"seibuFair": {
+		"announcement": {
+			"label": "2026年6月19日〜30日",
+			"title": "西武フェア",
+			"actionLabel": "イベントを見る"
+		},
+		"posterAlt": "西武フェアポスター",
+		"details": {
+			"date": "開催日",
+			"venue": "会場",
+			"admission": "入場料"
+		},
+		"stats": {
+			"companies": "出展企業",
+			"exhibits": "出品数",
+			"handsOnEvents": "体験イベント"
+		},
+		"sections": {
+			"companies": "出展企業",
+			"products": "主な商品",
+			"registration": "体験イベント・予約",
+			"registrationIntro": "体験イベントを選択し、ご希望の回を予約してください。"
+		},
+		"tabs": {
+			"yukata": "浴衣",
+			"origami": "折り紙",
+			"color": "カラーコーディネート"
+		},
+		"table": {
+			"session": "開催回",
+			"seats": "空席状況",
+			"seatsBooked": "{booked}／{capacity}名予約済み"
+		},
+		"actions": {
+			"reserveSeat": "席を予約する",
+			"reserve": "予約する",
+			"full": "満員",
+			"done": "完了",
+			"submitting": "送信中...",
+			"submitReservation": "予約を送信"
+		},
+		"reservation": {
+			"completeTitle": "ありがとうございます",
+			"completeMessage": "予約内容をご確認ください。",
+			"previewNote": "プレビュー表示です。Kurocoの予約フォームはまだ設定されていません。",
+			"reserveTitle": "{date} を予約",
+			"remainingSeats": "残り{count}席",
+			"summary": {
+				"experience": "体験イベント",
+				"session": "開催回",
+				"name": "お名前",
+				"email": "メールアドレス",
+				"participants": "参加人数",
+				"reference": "受付番号"
+			}
+		},
+		"form": {
+			"name": "お名前",
+			"email": "メールアドレス",
+			"participants": "参加人数"
+		},
+		"errors": {
+			"registration": "お名前、有効なメールアドレス、残席数以内の参加人数を入力してください。"
+		},
+		"accessibility": {
+			"experienceType": "体験イベントの種類",
+			"closeReservation": "予約フォームを閉じる"
+		},
+		"seo": {
+			"description": "{host}が日本の工芸、文化、商品、無料体験を紹介します。"
+		}
+	}
+}
