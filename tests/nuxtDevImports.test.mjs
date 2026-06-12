@@ -137,12 +137,20 @@ test('Cloudflare Worker deployment uses Nitro generated Wrangler config', async 
 	assert.match(readme, /Wrangler 4\.21\.0\+ is required/);
 	assert.equal(pkg.devDependencies.wrangler, '4.24.0');
 	assert.match(pkg.volta.node, /^20\./);
+	assert.match(mainWorkflow, /uses:\s*actions\/checkout@v6/);
+	assert.match(stagingWorkflow, /uses:\s*actions\/checkout@v6/);
+	assert.match(mainWorkflow, /uses:\s*actions\/setup-node@v6/);
+	assert.match(stagingWorkflow, /uses:\s*actions\/setup-node@v6/);
+	assert.match(mainWorkflow, /uses:\s*actions\/upload-artifact@v7/);
+	assert.match(stagingWorkflow, /uses:\s*actions\/upload-artifact@v7/);
 	assert.match(mainWorkflow, /node-version:\s*'20\./);
 	assert.match(stagingWorkflow, /node-version:\s*'20\./);
 	assert.match(mainWorkflow, /submodules:\s*false/);
 	assert.match(stagingWorkflow, /submodules:\s*false/);
 	assert.doesNotMatch(mainWorkflow, /submodules:\s*true/);
 	assert.doesNotMatch(stagingWorkflow, /submodules:\s*true/);
+	assert.match(mainWorkflow, /include-hidden-files:\s*true/);
+	assert.match(stagingWorkflow, /include-hidden-files:\s*true/);
 	assert.equal(await exists(new URL('../wrangler.jsonc', import.meta.url)), false);
 	assert.equal(
 		await exists(new URL('../scripts/deploy-cloudflare-worker.mjs', import.meta.url)),
