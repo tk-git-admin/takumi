@@ -3,6 +3,8 @@ import { access, readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 
 import { getSeibuFairEvent, seibuFairEvent } from '../data/seibuFair.mjs';
+import { shouldShowSeibuAnnouncement } from '../utils/seibuAnnouncementVisibility.mjs';
+import { resolveSeibuExhibitorInitials } from '../utils/seibuExhibitorPresentation.mjs';
 import {
 	canReserveParticipants,
 	createSessionSeatMap,
@@ -10,17 +12,6 @@ import {
 	getRemainingSeats,
 	isValidRegistration,
 } from '../utils/seibuReservation.mjs';
-
-async function readPngSize(path) {
-	const buffer = await readFile(path);
-
-	assert.equal(buffer.toString('ascii', 1, 4), 'PNG');
-
-	return {
-		width: buffer.readUInt32BE(16),
-		height: buffer.readUInt32BE(20),
-	};
-}
 
 test('SEIBU fair event data uses the approved frontend scope', () => {
 	assert.equal(seibuFairEvent.route, '/seibu-fair');
@@ -77,24 +68,8 @@ test('SEIBU fair product assets are available in the public image folder', async
 	}
 });
 
-test('SEIBU exhibitor cards use logos without numbered badges', async () => {
+test('SEIBU exhibitor cards use CMS logos with initials placeholders', async () => {
 	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
-	const logoAssets = [
-		['takumi.png', 2428, 648],
-		['uwakai.png', 2428, 648],
-		['yoshimune.png', 2428, 648],
-		['fitokio.png', 2428, 648],
-		['youme.png', 2428, 648],
-		['sui-ryu.png', 2428, 648],
-		['wawawa.png', 2428, 648],
-		['qlogo.png', 2428, 648],
-		['lita.png', 2428, 648],
-		['japonism.png', 2428, 648],
-		['creo.png', 2428, 648],
-		['ezu.png', 2428, 648],
-		['fukushin.png', 2428, 648],
-		['taylor.png', 2428, 648],
-	];
 
 	assert.equal(pageSource.includes('badge badge-primary'), false);
 	assert.equal(pageSource.includes('exhibitorNumber'), false);
@@ -103,26 +78,35 @@ test('SEIBU exhibitor cards use logos without numbered badges', async () => {
 	assert.equal(pageSource.includes('seibu-exhibitor-brand'), true);
 	assert.equal(pageSource.includes('seibu-exhibitor-logo-panel'), true);
 	assert.equal(pageSource.includes('seibu-exhibitor-logo'), true);
-	assert.equal(pageSource.includes('seibu-exhibitor-wordmark'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-initials'), true);
 	assert.equal(pageSource.includes('seibu-exhibitor-divider'), true);
 	assert.equal(pageSource.includes('seibu-exhibitor-copy'), true);
 	assert.equal(pageSource.includes('seibu-exhibitor-title'), true);
-	assert.equal(pageSource.includes('fallbackLogoTitle'), true);
+	assert.equal(pageSource.includes('{{ exhibitor.logoInitials }}'), true);
+	assert.equal(
+		pageSource.includes('logoInitials: resolveSeibuExhibitorInitials(displayName)'),
+		true,
+	);
 	assert.equal(pageSource.includes('exhibitorTitleFallback'), true);
 	assert.equal(pageSource.includes('max-width: 1538px'), true);
 	assert.equal(pageSource.includes('min-height: 25.25rem'), true);
-	assert.equal(pageSource.includes("new Set(['/img/seibu-fair/logos/qlogo.png'])"), false);
+	assert.equal(pageSource.includes('seibu-exhibitor-wordmark'), false);
+	assert.equal(pageSource.includes('fallbackLogoTitle'), false);
+	assert.equal(pageSource.includes('fallbackLogoSubtitle'), false);
+	assert.equal(pageSource.includes('EXHIBITOR_LOGOS_BY_ID'), false);
+	assert.equal(pageSource.includes('EXHIBITOR_LOGO_ALIASES'), false);
+	assert.equal(pageSource.includes('/img/seibu-fair/logos/'), false);
 	assert.equal(pageSource.includes('DARK_EXHIBITOR_LOGOS'), false);
 	assert.equal(pageSource.includes('logoTone'), false);
 	assert.equal(pageSource.includes('seibu-exhibitor-logo-frame--dark'), false);
+});
 
-	for (const [asset, width, height] of logoAssets) {
-		const assetPath = new URL(`../public/img/seibu-fair/logos/${asset}`, import.meta.url);
-
-		assert.equal(pageSource.includes(`/img/seibu-fair/logos/${asset}`), true);
-		await access(assetPath);
-		assert.deepEqual(await readPngSize(assetPath), { width, height });
-	}
+test('SEIBU exhibitor initials come from meaningful display-name words', () => {
+	assert.equal(resolveSeibuExhibitorInitials('Takumi International'), 'TI');
+	assert.equal(resolveSeibuExhibitorInitials('FITOKIO (TAC & IDCJ Wellness Sdn Bhd)'), 'F');
+	assert.equal(resolveSeibuExhibitorInitials('QLOGO'), 'Q');
+	assert.equal(resolveSeibuExhibitorInitials('Creo Co., Ltd.'), 'C');
+	assert.equal(resolveSeibuExhibitorInitials(''), '?');
 });
 
 test('SEIBU scoped styles use shared Takumi color tokens', async () => {
@@ -230,11 +214,19 @@ test('announcement component remains reusable and nav localizes campaign copy', 
 	assert.equal(navSource.includes('~/data/seibuFair'), false);
 });
 
-test('SEIBU announcement is gated to homepage routes in the nav', async () => {
+test('SEIBU announcement is hidden on the event route and visible elsewhere', async () => {
 	const navSource = await readFile(new URL('../components/NavMenu.vue', import.meta.url), 'utf8');
 
-	assert.equal(navSource.includes('v-if="isHomePage"'), true);
-	assert.equal(navSource.includes("['/', '/ja', '/ja/']"), true);
+	assert.equal(navSource.includes('v-if="isHomePage"'), false);
+	assert.equal(navSource.includes("['/', '/ja', '/ja/']"), false);
+	assert.equal(shouldShowSeibuAnnouncement('/'), true);
+	assert.equal(shouldShowSeibuAnnouncement('/newslist/'), true);
+	assert.equal(shouldShowSeibuAnnouncement('/ja/newslist/'), true);
+	assert.equal(shouldShowSeibuAnnouncement('/seibu-fair'), false);
+	assert.equal(shouldShowSeibuAnnouncement('/seibu-fair/'), false);
+	assert.equal(shouldShowSeibuAnnouncement('/ja/seibu-fair'), false);
+	assert.equal(shouldShowSeibuAnnouncement('/ja/seibu-fair/'), false);
+	assert.match(navSource, /v-if="showSeibuAnnouncement"/);
 	assert.match(navSource, /<AnnouncementBar/);
 });
 
@@ -280,7 +272,10 @@ test('SEIBU event page uses existing design-system buttons and internal APIs', a
 	assert.equal(pageSource.includes('~/data/seibuFair'), false);
 	assert.equal(pageSource.includes('/api/content/seibu-fair'), true);
 	assert.equal(pageSource.includes('/api/seibu-fair/reservations'), true);
-	assert.match(pageSource, /asString\(exhibitor\?\.logoSrc\).*EXHIBITOR_LOGOS_BY_ID/s);
+	assert.match(
+		pageSource,
+		/function resolveExhibitorLogo\(exhibitor\)\s*{\s*return asString\(exhibitor\?\.logoSrc\);\s*}/,
+	);
 	assert.equal(nuxtConfigSource.includes('/rcms-api/1/seibu-reservations'), true);
 });
 

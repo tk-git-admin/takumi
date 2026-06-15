@@ -1,7 +1,7 @@
 <template>
 	<header class="fixed top-0 w-full z-30 bg-base-100 transition-all">
 		<AnnouncementBar
-			v-if="isHomePage"
+			v-if="showSeibuAnnouncement"
 			:to="getLink(seibuFairAnnouncement.to)"
 			:label="seibuFairAnnouncement.label"
 			:title="seibuFairAnnouncement.title"
@@ -98,6 +98,8 @@
 </template>
 
 <script setup>
+import { shouldShowSeibuAnnouncement } from '~/utils/seibuAnnouncementVisibility.mjs';
+
 const router = useRouter();
 const { t } = useI18n();
 const logoSrc = '/img/takumi-logo.webp';
@@ -110,7 +112,7 @@ const seibuFairAnnouncement = computed(() => ({
 	title: t('seibuFair.announcement.title'),
 	actionLabel: t('seibuFair.announcement.actionLabel'),
 }));
-const isHomePage = computed(() => ['/', '/ja', '/ja/'].includes(currentRoute.value.path));
+const showSeibuAnnouncement = computed(() => shouldShowSeibuAnnouncement(currentRoute.value.path));
 
 const links = {
 	home: `/`,

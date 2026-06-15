@@ -80,8 +80,8 @@ test('SEIBU flat Kuroco content fields are mapped into the event shape', () => {
 					title: 'CMS reserve',
 				},
 				companies_title: 'CMS companies',
-				company_title: ['Company A', 'Company B'],
-				company_description: ['Description A', 'Description B'],
+				company_title: ['Company A', 'Company B', 'Company C'],
+				company_description: ['Description A', 'Description B', 'Description C'],
 				company_logo: [
 					{
 						url: 'https://takumi-international.g.kuroco-img.app/v=1781486915/files/topics/54_ext_3_0.png',
@@ -151,6 +151,13 @@ test('SEIBU flat Kuroco content fields are mapped into the event shape', () => {
 			logoName: 'uwakai',
 			logoSrc:
 				'https://takumi-international.g.kuroco-img.app/v=1781486915/files/topics/54_ext_3_1.png',
+		},
+		{
+			id: 'exhibitor-3',
+			name: 'Company C',
+			description: 'Description C',
+			logoName: '',
+			logoSrc: '',
 		},
 	]);
 	assert.deepEqual(normalized.productAssets, [

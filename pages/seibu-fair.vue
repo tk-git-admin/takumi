@@ -100,11 +100,8 @@
 										class="seibu-exhibitor-logo"
 										loading="lazy" />
 								</span>
-								<span v-else class="seibu-exhibitor-wordmark">
-									<strong>{{ exhibitor.fallbackLogoTitle }}</strong>
-									<small v-if="exhibitor.fallbackLogoSubtitle">
-										{{ exhibitor.fallbackLogoSubtitle }}
-									</small>
+								<span v-else class="seibu-exhibitor-initials" aria-hidden="true">
+									{{ exhibitor.logoInitials }}
 								</span>
 							</div>
 							<div class="seibu-exhibitor-divider" aria-hidden="true"></div>
@@ -391,6 +388,7 @@ import {
 	getSeatPercent,
 	isValidRegistration,
 } from '~/utils/seibuReservation.mjs';
+import { resolveSeibuExhibitorInitials } from '~/utils/seibuExhibitorPresentation.mjs';
 
 const DEFAULT_POSTER_ASSET = {
 	name: '',
@@ -424,22 +422,6 @@ const EMPTY_SEIBU_EVENT = {
 	experiences: [],
 };
 const EMPTY_EXPERIENCE = { id: '', name: '', label: '', time: '', sessions: [] };
-const EXHIBITOR_LOGOS_BY_ID = {
-	'exhibitor-1': '/img/seibu-fair/logos/takumi.png',
-	'exhibitor-2': '/img/seibu-fair/logos/uwakai.png',
-	'exhibitor-3': '/img/seibu-fair/logos/yoshimune.png',
-	'exhibitor-4': '/img/seibu-fair/logos/fitokio.png',
-	'exhibitor-5': '/img/seibu-fair/logos/youme.png',
-	'exhibitor-6': '/img/seibu-fair/logos/sui-ryu.png',
-	'exhibitor-7': '/img/seibu-fair/logos/wawawa.png',
-	'exhibitor-8': '/img/seibu-fair/logos/qlogo.png',
-	'exhibitor-9': '/img/seibu-fair/logos/lita.png',
-	'exhibitor-10': '/img/seibu-fair/logos/japonism.png',
-	'exhibitor-11': '/img/seibu-fair/logos/creo.png',
-	'exhibitor-12': '/img/seibu-fair/logos/ezu.png',
-	'exhibitor-13': '/img/seibu-fair/logos/fukushin.png',
-	'exhibitor-14': '/img/seibu-fair/logos/taylor.png',
-};
 const EXHIBITOR_DISPLAY_NAMES_BY_ID = {
 	'exhibitor-1': 'Takumi International',
 	'exhibitor-2': 'UWAKAI PEARL',
@@ -456,70 +438,6 @@ const EXHIBITOR_DISPLAY_NAMES_BY_ID = {
 	'exhibitor-13': 'Fukushin Co., Ltd.',
 	'exhibitor-14': "Taylor's University",
 };
-const EXHIBITOR_WORDMARKS_BY_ID = {
-	'exhibitor-4': {
-		title: 'FITOKIO',
-		subtitle: 'TAC & IDCJ Wellness Sdn Bhd',
-	},
-};
-const EXHIBITOR_LOGO_ALIASES = [
-	{
-		src: '/img/seibu-fair/logos/takumi.png',
-		names: ['takumi international', 'タクミインターナショナル'],
-	},
-	{
-		src: '/img/seibu-fair/logos/uwakai.png',
-		names: ['uwakai', 'uwajima', '宇和海真珠'],
-	},
-	{
-		src: '/img/seibu-fair/logos/yoshimune.png',
-		names: ['yoshimune', 'yoshimune knives', '由宗刃物'],
-	},
-	{
-		src: '/img/seibu-fair/logos/fitokio.png',
-		names: ['fitokio', 'tac & idcj', 'wellness'],
-	},
-	{
-		src: '/img/seibu-fair/logos/youme.png',
-		names: ['you&me', 'you & me', 'youandme', 'ユーアンドミー'],
-	},
-	{
-		src: '/img/seibu-fair/logos/sui-ryu.png',
-		names: ['sui-ryu', 'suiryu', 'sui ryu', 'スイリュウ'],
-	},
-	{
-		src: '/img/seibu-fair/logos/wawawa.png',
-		names: ['wawawa', '和輪笑'],
-	},
-	{
-		src: '/img/seibu-fair/logos/qlogo.png',
-		names: ['qlogo', 'クロゴ'],
-	},
-	{
-		src: '/img/seibu-fair/logos/lita.png',
-		names: ['lita', '株式会社lita'],
-	},
-	{
-		src: '/img/seibu-fair/logos/japonism.png',
-		names: ['japonism', '株式会社japonism'],
-	},
-	{
-		src: '/img/seibu-fair/logos/creo.png',
-		names: ['creo', 'クレオ'],
-	},
-	{
-		src: '/img/seibu-fair/logos/ezu.png',
-		names: ['ezu', '株式会社ezu'],
-	},
-	{
-		src: '/img/seibu-fair/logos/fukushin.png',
-		names: ['fukushin', 'フクシン'],
-	},
-	{
-		src: '/img/seibu-fair/logos/taylor.png',
-		names: ['taylor', 'テイラーズ大学'],
-	},
-];
 
 const { locale, t } = useI18n();
 const { data: seibuEvent } = await useFetch('/api/content/seibu-fair', {
@@ -603,14 +521,12 @@ const exhibitorsWithLogos = computed(() =>
 	(event.value.exhibitors || []).map((exhibitor) => {
 		const logoSrc = resolveExhibitorLogo(exhibitor);
 		const displayName = resolveExhibitorDisplayName(exhibitor);
-		const fallbackLogo = resolveExhibitorWordmark(exhibitor, displayName);
 
 		return {
 			...exhibitor,
 			logoSrc,
 			logoAlt: asString(exhibitor.logoName) || displayName,
-			fallbackLogoTitle: fallbackLogo.title,
-			fallbackLogoSubtitle: fallbackLogo.subtitle,
+			logoInitials: resolveSeibuExhibitorInitials(displayName),
 			exhibitorTitleFallback: displayName,
 		};
 	}),
@@ -644,13 +560,6 @@ function asString(value) {
 	return '';
 }
 
-function normalizeExhibitorName(value) {
-	return String(value || '')
-		.trim()
-		.toLowerCase()
-		.replace(/\s+/g, ' ');
-}
-
 function resolveExhibitorDisplayName(exhibitor) {
 	return (
 		EXHIBITOR_DISPLAY_NAMES_BY_ID[String(exhibitor?.id || '')] ||
@@ -658,41 +567,8 @@ function resolveExhibitorDisplayName(exhibitor) {
 	);
 }
 
-function splitParentheticalSubtitle(value) {
-	const match = String(value || '').match(/^(.+?)\s*\((.+)\)$/);
-	if (!match) {
-		return {
-			title: String(value || '').trim(),
-			subtitle: '',
-		};
-	}
-
-	return {
-		title: match[1].trim(),
-		subtitle: match[2].trim(),
-	};
-}
-
-function resolveExhibitorWordmark(exhibitor, displayName) {
-	const wordmark = EXHIBITOR_WORDMARKS_BY_ID[String(exhibitor?.id || '')];
-	if (wordmark) return wordmark;
-
-	return splitParentheticalSubtitle(displayName);
-}
-
 function resolveExhibitorLogo(exhibitor) {
-	const cmsLogo = asString(exhibitor?.logoSrc);
-	if (cmsLogo) return cmsLogo;
-
-	const logoById = EXHIBITOR_LOGOS_BY_ID[String(exhibitor?.id || '')];
-	if (logoById) return logoById;
-
-	const name = normalizeExhibitorName(exhibitor?.name);
-	const match = EXHIBITOR_LOGO_ALIASES.find((logo) =>
-		logo.names.some((alias) => name.includes(normalizeExhibitorName(alias))),
-	);
-
-	return match?.src || '';
+	return asString(exhibitor?.logoSrc);
 }
 
 function scrollToRegistration() {
@@ -941,26 +817,21 @@ useSeoMeta({
 	object-position: center;
 }
 
-.seibu-exhibitor-wordmark {
-	display: flex;
-	flex-direction: column;
+.seibu-exhibitor-initials {
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.25rem;
-	text-align: center;
-	color: var(--tk-color-sumi);
-}
-
-.seibu-exhibitor-wordmark strong {
-	font-size: clamp(1.5rem, 2vw, 1.9rem);
-	line-height: 1.05;
-}
-
-.seibu-exhibitor-wordmark small {
-	max-width: 14rem;
-	font-size: 0.86rem;
-	font-weight: 600;
-	line-height: 1.25;
+	min-width: 4.5rem;
+	height: 3.25rem;
+	padding: 0 0.95rem;
+	border: 1px solid rgb(var(--tk-color-brand-brown-rgb) / 22%);
+	border-radius: 0.375rem;
+	background: rgb(var(--tk-color-brand-brown-rgb) / 6%);
+	color: var(--tk-color-brand-brown);
+	font-size: clamp(1.15rem, 1.7vw, 1.45rem);
+	font-weight: 800;
+	letter-spacing: 0;
+	line-height: 1;
 }
 
 .seibu-exhibitor-divider {
