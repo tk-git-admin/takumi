@@ -97,6 +97,11 @@
 	text-align: left;
 }
 
+.newsblog-article :deep(.c-heading-lv2 *),
+.newsblog-article :deep(.heading-lv3 *) {
+	color: #fff !important;
+}
+
 .newsblog-article :deep(.heading-lv3 strong) {
 	color: #fff !important;
 }

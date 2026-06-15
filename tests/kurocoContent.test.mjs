@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 
 import {
@@ -123,4 +124,42 @@ test('news detail hero title decodes HTML entities from Kuroco native subject', 
 		findNewsBySlug(list, 'fair_2026').details.hero.hero_title,
 		'[Update] Takumi International to Host Premium "Japan Fair" at SEIBU',
 	);
+});
+
+test('news detail article headings remove Kuroco marker characters only from heading titles', () => {
+	const list = [
+		{
+			slug: 'fair_2026',
+			news: {
+				article: [
+					'<h3 class="c-heading-lv2" data-path-to-node="8">■ Concept: Where Tradition Meets Modern Luxury</h3>',
+					'<p>■ This paragraph marker should remain.</p>',
+					'<h3 class="c-heading-lv2" data-path-to-node="9"><b data-path-to-node="9" data-index-in-node="0"><strong>■ Craftsmanship</strong></b></h3>',
+					'<h4 class="heading-lv3"><span>● Materials</span></h4>',
+				].join(''),
+			},
+		},
+	];
+
+	assert.deepEqual(findNewsBySlug(list, 'fair_2026'), {
+		details: {
+			slug: 'fair_2026',
+			news: {
+				article: [
+					'<h3 class="c-heading-lv2" data-path-to-node="8">Concept: Where Tradition Meets Modern Luxury</h3>',
+					'<p>■ This paragraph marker should remain.</p>',
+					'<h3 class="c-heading-lv2" data-path-to-node="9"><b data-path-to-node="9" data-index-in-node="0"><strong>Craftsmanship</strong></b></h3>',
+					'<h4 class="heading-lv3"><span>Materials</span></h4>',
+				].join(''),
+			},
+		},
+		pageInfo: null,
+	});
+});
+
+test('news article heading styles keep nested Kuroco heading text white', async () => {
+	const pageSource = await readFile(new URL('../pages/news/[slug].vue', import.meta.url), 'utf8');
+
+	assert.equal(pageSource.includes('.newsblog-article :deep(.c-heading-lv2 *),'), true);
+	assert.equal(pageSource.includes('.newsblog-article :deep(.heading-lv3 *)'), true);
 });

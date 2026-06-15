@@ -1,4 +1,7 @@
 const SUPPORTED_LOCALES = new Set(['en', 'ja']);
+const ARTICLE_HEADING_CLASS_PATTERN = /\b(?:c-heading-lv2|heading-lv3)\b/;
+const ARTICLE_HEADING_MARKER_PATTERN =
+	/^((?:(?:\s|&nbsp;|&#160;)*<(?:b|strong|span)\b[^>]*>)*(?:\s|&nbsp;|&#160;)*)[■●•・]\s*/i;
 const CONTENT_PATHS = {
 	home: ({ homeId, homeSlugId }) => `/rcms-api/${homeId}/home/${homeSlugId}`,
 	news: ({ newsBlogId }) => `/rcms-api/${newsBlogId}/newsblog`,
@@ -39,23 +42,62 @@ function decodeHtmlEntities(value) {
 	});
 }
 
-function preferNativeTitleForHero(details) {
-	if (!details || typeof details !== 'object' || Array.isArray(details)) {
-		return details || null;
+function stripArticleHeadingMarker(content) {
+	return content.replace(ARTICLE_HEADING_MARKER_PATTERN, '$1');
+}
+
+function normalizeArticleHeadingMarkers(article) {
+	if (typeof article !== 'string' || !article) {
+		return article;
 	}
 
-	const nativeTitle = decodeHtmlEntities(asString(details.subject));
-	if (!nativeTitle) {
-		return details;
-	}
+	return article.replace(
+		/<h([1-6])\b([^>]*)>([\s\S]*?)<\/h\1>/gi,
+		(match, level, attributes, content) => {
+			if (!ARTICLE_HEADING_CLASS_PATTERN.test(attributes)) {
+				return match;
+			}
 
-	const hero = details.hero;
-	if (!hero || typeof hero !== 'object' || Array.isArray(hero)) {
+			return `<h${level}${attributes}>${stripArticleHeadingMarker(content)}</h${level}>`;
+		},
+	);
+}
+
+function normalizeNewsArticle(details) {
+	const article = details?.news?.article;
+	const normalizedArticle = normalizeArticleHeadingMarkers(article);
+
+	if (normalizedArticle === article) {
 		return details;
 	}
 
 	return {
 		...details,
+		news: {
+			...details.news,
+			article: normalizedArticle,
+		},
+	};
+}
+
+function preferNativeTitleForHero(details) {
+	if (!details || typeof details !== 'object' || Array.isArray(details)) {
+		return details || null;
+	}
+
+	const detailsWithArticle = normalizeNewsArticle(details);
+	const nativeTitle = decodeHtmlEntities(asString(details.subject));
+	if (!nativeTitle) {
+		return detailsWithArticle;
+	}
+
+	const hero = detailsWithArticle.hero;
+	if (!hero || typeof hero !== 'object' || Array.isArray(hero)) {
+		return detailsWithArticle;
+	}
+
+	return {
+		...detailsWithArticle,
 		hero: {
 			...hero,
 			hero_title: nativeTitle,
