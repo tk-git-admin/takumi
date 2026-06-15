@@ -82,6 +82,18 @@ test('SEIBU flat Kuroco content fields are mapped into the event shape', () => {
 				companies_title: 'CMS companies',
 				company_title: ['Company A', 'Company B'],
 				company_description: ['Description A', 'Description B'],
+				company_logo: [
+					{
+						url: 'https://takumi-international.g.kuroco-img.app/v=1781486915/files/topics/54_ext_3_0.png',
+						desc: 'takumi',
+						url_org: 'https://takumi-international.g.kuroco-img.app/files/topics/54_ext_3_0.png',
+					},
+					{
+						url: 'https://takumi-international.g.kuroco-img.app/v=1781486915/files/topics/54_ext_3_1.png',
+						desc: 'uwakai',
+						url_org: 'https://takumi-international.g.kuroco-img.app/files/topics/54_ext_3_1.png',
+					},
+				],
 				featured_products_title: 'CMS products',
 				product_image: [
 					{
@@ -124,8 +136,22 @@ test('SEIBU flat Kuroco content fields are mapped into the event shape', () => {
 		src: 'https://cdn.example.test/poster.jpeg',
 	});
 	assert.deepEqual(normalized.exhibitors, [
-		{ id: 'exhibitor-1', name: 'Company A', description: 'Description A' },
-		{ id: 'exhibitor-2', name: 'Company B', description: 'Description B' },
+		{
+			id: 'exhibitor-1',
+			name: 'Company A',
+			description: 'Description A',
+			logoName: 'takumi',
+			logoSrc:
+				'https://takumi-international.g.kuroco-img.app/v=1781486915/files/topics/54_ext_3_0.png',
+		},
+		{
+			id: 'exhibitor-2',
+			name: 'Company B',
+			description: 'Description B',
+			logoName: 'uwakai',
+			logoSrc:
+				'https://takumi-international.g.kuroco-img.app/v=1781486915/files/topics/54_ext_3_1.png',
+		},
 	]);
 	assert.deepEqual(normalized.productAssets, [
 		{

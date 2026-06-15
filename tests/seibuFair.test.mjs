@@ -11,6 +11,17 @@ import {
 	isValidRegistration,
 } from '../utils/seibuReservation.mjs';
 
+async function readPngSize(path) {
+	const buffer = await readFile(path);
+
+	assert.equal(buffer.toString('ascii', 1, 4), 'PNG');
+
+	return {
+		width: buffer.readUInt32BE(16),
+		height: buffer.readUInt32BE(20),
+	};
+}
+
 test('SEIBU fair event data uses the approved frontend scope', () => {
 	assert.equal(seibuFairEvent.route, '/seibu-fair');
 	assert.equal(seibuFairEvent.dates.year, 2026);
@@ -63,6 +74,90 @@ test('SEIBU fair product assets are available in the public image folder', async
 	for (const asset of seibuFairEvent.productAssets) {
 		assert.match(asset.src, /^\/img\/seibu-fair\//);
 		await access(new URL(`../public${asset.src}`, import.meta.url));
+	}
+});
+
+test('SEIBU exhibitor cards use logos without numbered badges', async () => {
+	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
+	const logoAssets = [
+		['takumi.png', 2428, 648],
+		['uwakai.png', 2428, 648],
+		['yoshimune.png', 2428, 648],
+		['fitokio.png', 2428, 648],
+		['youme.png', 2428, 648],
+		['sui-ryu.png', 2428, 648],
+		['wawawa.png', 2428, 648],
+		['qlogo.png', 2428, 648],
+		['lita.png', 2428, 648],
+		['japonism.png', 2428, 648],
+		['creo.png', 2428, 648],
+		['ezu.png', 2428, 648],
+		['fukushin.png', 2428, 648],
+		['taylor.png', 2428, 648],
+	];
+
+	assert.equal(pageSource.includes('badge badge-primary'), false);
+	assert.equal(pageSource.includes('exhibitorNumber'), false);
+	assert.equal(pageSource.includes('seibu-exhibitor-card'), true);
+	assert.equal(pageSource.includes('seibu-companies-container'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-brand'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-logo-panel'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-logo'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-wordmark'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-divider'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-copy'), true);
+	assert.equal(pageSource.includes('seibu-exhibitor-title'), true);
+	assert.equal(pageSource.includes('fallbackLogoTitle'), true);
+	assert.equal(pageSource.includes('exhibitorTitleFallback'), true);
+	assert.equal(pageSource.includes('max-width: 1538px'), true);
+	assert.equal(pageSource.includes('min-height: 25.25rem'), true);
+	assert.equal(pageSource.includes("new Set(['/img/seibu-fair/logos/qlogo.png'])"), false);
+	assert.equal(pageSource.includes('DARK_EXHIBITOR_LOGOS'), false);
+	assert.equal(pageSource.includes('logoTone'), false);
+	assert.equal(pageSource.includes('seibu-exhibitor-logo-frame--dark'), false);
+
+	for (const [asset, width, height] of logoAssets) {
+		const assetPath = new URL(`../public/img/seibu-fair/logos/${asset}`, import.meta.url);
+
+		assert.equal(pageSource.includes(`/img/seibu-fair/logos/${asset}`), true);
+		await access(assetPath);
+		assert.deepEqual(await readPngSize(assetPath), { width, height });
+	}
+});
+
+test('SEIBU scoped styles use shared Takumi color tokens', async () => {
+	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
+	const tokensSource = await readFile(new URL('../assets/css/tokens.css', import.meta.url), 'utf8');
+
+	for (const token of [
+		'--tk-color-brand-brown-rgb',
+		'--tk-color-event-red-rgb',
+		'--tk-color-ink-rgb',
+		'--tk-color-white',
+	]) {
+		assert.equal(tokensSource.includes(token), true);
+	}
+
+	for (const literal of [
+		'#c81f32',
+		'#fff',
+		'#26201d',
+		'rgb(200 31 50',
+		'rgb(28 24 22',
+		'rgb(119 44 26',
+	]) {
+		assert.equal(pageSource.includes(literal), false);
+	}
+
+	for (const tokenRef of [
+		'var(--tk-color-event-red)',
+		'var(--tk-color-white)',
+		'rgb(var(--tk-color-event-red-rgb) / 18%)',
+		'rgb(var(--tk-color-ink-rgb) / 5%)',
+		'rgb(var(--tk-color-brand-brown-rgb) / 22%)',
+		'rgb(var(--tk-color-brand-brown-rgb) / 12%)',
+	]) {
+		assert.equal(pageSource.includes(tokenRef), true);
 	}
 });
 
@@ -185,6 +280,7 @@ test('SEIBU event page uses existing design-system buttons and internal APIs', a
 	assert.equal(pageSource.includes('~/data/seibuFair'), false);
 	assert.equal(pageSource.includes('/api/content/seibu-fair'), true);
 	assert.equal(pageSource.includes('/api/seibu-fair/reservations'), true);
+	assert.match(pageSource, /asString\(exhibitor\?\.logoSrc\).*EXHIBITOR_LOGOS_BY_ID/s);
 	assert.equal(nuxtConfigSource.includes('/rcms-api/1/seibu-reservations'), true);
 });
 
