@@ -220,13 +220,20 @@ function readFlatEventDetails(headings, descriptions) {
 function mapFlatExhibitors(item) {
 	const names = asList(readField(item, 'company_title'));
 	const descriptions = asList(readField(item, 'company_description'));
-	const length = Math.max(names.length, descriptions.length);
+	const logos = asList(readField(item, 'company_logo'));
+	const length = Math.max(names.length, descriptions.length, logos.length);
 
-	return Array.from({ length }, (_, index) => ({
-		id: `exhibitor-${index + 1}`,
-		name: asString(names[index]),
-		description: asString(descriptions[index]),
-	})).filter((exhibitor) => exhibitor.name || exhibitor.description);
+	return Array.from({ length }, (_, index) => {
+		const logo = logos[index];
+
+		return {
+			id: `exhibitor-${index + 1}`,
+			name: asString(names[index]),
+			description: asString(descriptions[index]),
+			logoName: readImageName(logo),
+			logoSrc: readImageSource(logo),
+		};
+	}).filter((exhibitor) => exhibitor.name || exhibitor.description || exhibitor.logoSrc);
 }
 
 function mapFlatProducts(item) {
@@ -428,8 +435,10 @@ function normalizeExhibitors(value, fallback) {
 			id: asString(exhibitor?.id) || `exhibitor-${index + 1}`,
 			name: asString(exhibitor?.name),
 			description: asString(exhibitor?.description),
+			logoName: asString(exhibitor?.logoName),
+			logoSrc: asString(exhibitor?.logoSrc),
 		}))
-		.filter((exhibitor) => exhibitor.name || exhibitor.description);
+		.filter((exhibitor) => exhibitor.name || exhibitor.description || exhibitor.logoSrc);
 }
 
 function normalizeSessions(value, fallback) {

@@ -1,8 +1,11 @@
 :root {
 	--tk-color-brand-brown: #772c1a;
+	--tk-color-brand-brown-rgb: 119 44 26;
 	--tk-color-event-red: #b52322;
+	--tk-color-event-red-rgb: 181 35 34;
 	--tk-color-event-gold: #c79a43;
 	--tk-color-ink: #211917;
+	--tk-color-ink-rgb: 33 25 23;
 	--tk-color-muted: #645a55;
 	--tk-color-paper: #fbfbf8;
 	--tk-color-rice: #eef3ef;
@@ -10,6 +13,7 @@
 	--tk-color-sumi: #171a1a;
 	--tk-color-moss: #60735f;
 	--tk-color-indigo: #263d59;
+	--tk-color-white: #fff;
 	--tk-space-section: clamp(4rem, 8vw, 7rem);
 	--tk-space-gutter: clamp(1rem, 4vw, 2rem);
 	--tk-content-max: 1180px;
