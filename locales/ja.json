@@ -42,9 +42,24 @@
 		}
 	},
 	"product": {
+		"bladeLength": "刃渡り",
+		"close": "商品詳細を閉じる",
+		"image": "商品画像",
+		"images": "商品画像",
 		"order": "注文",
+		"orderMessage": "{name}を注文したいです",
+		"price": "価格",
 		"soldout": "売れ切り",
 		"view": "詳しく見る"
+	},
+	"footer": {
+		"brandLabel": "タクミ・インターナショナル フッター",
+		"kicker": "日本 / マレーシア",
+		"description": "日本の工芸品、ライフスタイル製品、ビジネス支援をマレーシアへつなぎます。",
+		"navLabel": "フッターナビゲーション",
+		"socialLabel": "タクミとつながる",
+		"copyright": "© {year} Takumi International Sdn Bhd. All rights reserved.",
+		"region": "クアラルンプール, マレーシア"
 	},
 	"topBanner": {
 		"title": "CASIO G-SHOCK時計",

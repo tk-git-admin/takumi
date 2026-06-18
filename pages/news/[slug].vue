@@ -1,22 +1,24 @@
 <template>
-	<div
-		v-if="content.hero.hero_image && content.hero.hero_image.url"
-		class="min-h-96 flex flex-col items-center"
-		:style="{ backgroundImage: `url(${content.hero.hero_image.url})`, backgroundSize: 'cover' }">
-		<div
-			class="flex flex-col justify-center items-center w-full text-center"
-			style="background: rgba(0, 0, 0, 0.69); flex-grow: 1">
-			<div class="max-w-full">
-				<h1 v-if="content.hero.hero_title" id="services" class="heading-2 pt-12 px-3.5">
-					{{ content.hero.hero_title }}
+	<section
+		v-if="heroImageUrl"
+		class="page-hero"
+		:style="newsHero.imageStyle"
+		aria-labelledby="page-hero-title">
+		<div class="page-hero__shade">
+			<div class="page-hero__content">
+				<p v-if="newsHero.label" class="page-hero__eyebrow">
+					{{ newsHero.label }}
+				</p>
+				<h1 v-if="newsHero.title" id="page-hero-title" class="page-hero__title">
+					{{ newsHero.title }}
 				</h1>
-				<h2 v-if="content.hero.hero_subtitle" class="heading-3 px-3.5">
-					{{ content.hero.hero_subtitle }}
-				</h2>
+				<p v-if="newsHero.description" class="page-hero__description">
+					{{ newsHero.description }}
+				</p>
 			</div>
 		</div>
-	</div>
-	<div v-else class="mt-20"></div>
+	</section>
+	<div v-else class="page-hero-spacer"></div>
 	<!--A little top spacing if there's no hero banner-->
 	<div
 		class="rich-text-block w-richtext w-72 md:w-10/12 m-auto mb-20 newsblog-article w-container"
@@ -24,23 +26,6 @@
 </template>
 
 <style scoped>
-.heading-2 {
-	font-family: Montserrat;
-	color: #fff;
-	text-align: center;
-	text-transform: uppercase;
-	font-size: 24px;
-}
-
-.heading-3 {
-	font-family: Montserrat;
-	color: #fff;
-	text-transform: uppercase;
-	font-weight: 600;
-	margin-top: 0;
-	line-height: 30px;
-}
-
 .newsblog-article {
 	display: flex;
 	flex-direction: column;
@@ -90,8 +75,8 @@
 
 .newsblog-article :deep(.c-heading-lv2),
 .newsblog-article :deep(.heading-lv3) {
-	background: #772c1a;
-	color: #fff !important;
+	background: var(--tk-color-brand-brown);
+	color: var(--tk-color-white) !important;
 	margin: 5px 0 10px;
 	padding: 3px 10px;
 	text-align: left;
@@ -99,11 +84,11 @@
 
 .newsblog-article :deep(.c-heading-lv2 *),
 .newsblog-article :deep(.heading-lv3 *) {
-	color: #fff !important;
+	color: var(--tk-color-white) !important;
 }
 
 .newsblog-article :deep(.heading-lv3 strong) {
-	color: #fff !important;
+	color: var(--tk-color-white) !important;
 }
 
 .list-decimal {
@@ -133,6 +118,8 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { getNewsHeroPresentation } from '~/utils/newsHeroPresentation.mjs';
+
 const { locale, t } = useI18n();
 
 const route = useRoute();
@@ -150,6 +137,14 @@ if (!data.value?.details) {
 }
 
 const content = data.value.details;
+const heroImageUrl = content.hero?.hero_image?.url || '';
+const newsHeroPresentation = getNewsHeroPresentation(content);
+const newsHero = computed(() => ({
+	...newsHeroPresentation,
+	imageStyle: {
+		'--page-hero-image': `url(${heroImageUrl})`,
+	},
+}));
 
 useSeoMeta({
 	title: t('seo.title'),

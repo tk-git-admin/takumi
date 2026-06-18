@@ -1,142 +1,130 @@
 <template>
 	<div>
-		<div class="main-section top no-hero wf-section mt-20">
-			<div class="top__banner" :style="{ backgroundImage: `url(${images.bannerTop})` }">
-				<h1 class="heading__h1">
-					{{ $t('knivesBanner.title') }}
-				</h1>
-				<h2 class="heading__h2">
-					{{ $t('knivesBanner.detail') }}
-				</h2>
-			</div>
-			<div class="w-container mb-20">
-				<div class="flex-wrapper">
+		<div class="main-section top no-hero wf-section knife-page">
+			<section
+				class="page-hero page-hero--plain"
+				:style="knivesHeroStyle"
+				aria-labelledby="knives-hero-title">
+				<div class="page-hero__shade">
+					<div class="page-hero__content">
+						<h1 id="knives-hero-title" class="page-hero__title">
+							{{ $t('knivesBanner.title') }}
+						</h1>
+						<p class="page-hero__description">
+							{{ $t('knivesBanner.detail') }}
+						</p>
+					</div>
+				</div>
+			</section>
+			<div class="w-container knife-products-container mb-20">
+				<div class="knife-products-grid">
 					<div
 						v-for="(item, index) in getKnivesList()"
 						:key="index"
-						class="box product"
-						@click="
-							showModal(
-								formatPrice(item.selling_price),
-								calculateDiscount(item.selling_price, item.retail_price),
-								item,
-							)
-						">
-						<div
-							v-if="item.image[0]"
-							class="box-image"
-							@mouseover="showPreview(index)"
-							@mouseleave="showPreview(index, false)">
-							<div>
-								<img :src="item.displayImage" style="display: block; width: 100%" />
-							</div>
+						class="knife-product-card"
+						role="button"
+						tabindex="0"
+						:aria-label="`${$t('product.view')}: ${item.brand_name} ${item.model_name} ${
+							item.blade_length
+						}`"
+						@click="openKnifeModal(item)"
+						@keydown.enter.prevent="openKnifeModal(item)"
+						@keydown.space.prevent="openKnifeModal(item)">
+						<div v-if="item.image[0]?.url" class="knife-product-card__image">
+							<img
+								class="knife-product-card__image-layer knife-product-card__image-layer--primary"
+								:src="item.image[0].url"
+								loading="lazy"
+								:alt="`${item.brand_name} ${item.model_name} ${item.blade_length}`" />
+							<img
+								v-if="item.image[1]?.url"
+								class="knife-product-card__image-layer knife-product-card__image-layer--secondary"
+								:src="item.image[1].url"
+								alt=""
+								aria-hidden="true"
+								loading="lazy" />
+							<span class="knife-product-card__image-shade" aria-hidden="true"></span>
 							<button
-								v-if="item.isPreview"
-								class="btn btn-primary box-image-btn"
-								@click="
-									showModal(
-										formatPrice(item.selling_price),
-										calculateDiscount(item.selling_price, item.retail_price),
-										item,
-									)
-								">
+								type="button"
+								class="btn btn-primary knife-product-card__hover-action"
+								@click.stop="openKnifeModal(item)">
 								{{ $t('product.view') }}
 							</button>
 						</div>
-						<div v-if="item.label.label || item.sold_out.length > 0" class="product__tag">
-							<span v-if="item.sold_out.length > 0">Sold Out</span>
+						<div
+							v-if="item.label.label || item.sold_out.length > 0"
+							class="knife-product-card__tag">
+							<span v-if="item.sold_out.length > 0">{{ $t('product.soldout') }}</span>
 							<span v-else>{{ item.label.label }}</span>
 						</div>
 
-						<div class="product__content">
-							<h2>{{ item.brand_name }}</h2>
-							<h2 class="product_brand_name">{{ item.model_name }} {{ item.blade_length }}</h2>
-							<div class="product-desc">
-								<p v-if="item.color_options">Color: {{ item.color_options }}</p>
-								<p class="price">
-									{{ formatPrice(item.selling_price) }}
+						<div class="knife-product-card__content">
+							<div class="knife-product-card__title">
+								<h2 class="knife-product-card__brand">{{ item.brand_name }}</h2>
+								<h2 class="knife-product-card__model">
+									{{ item.model_name }} {{ item.blade_length }}
+								</h2>
+							</div>
+							<div class="knife-product-card__meta">
+								<p v-if="item.color_options" class="knife-product-card__attribute">
+									{{ item.color_options }}
+								</p>
+								<p class="knife-product-card__price price">
+									<span>{{ formatPrice(item.selling_price) }}</span>
 									<span v-if="item.selling_price < item.retail_price" class="discount-percent-text">
-										{{ calculateDiscount(item.selling_price, item.retail_price) }}% off
+										-{{ calculateDiscount(item.selling_price, item.retail_price) }}%
 									</span>
 								</p>
 								<p v-if="item.selling_price < item.retail_price" class="retail-price">
 									{{ formatPrice(item.retail_price) }}
 								</p>
-								<a target="_blank" :href="item.more_info_link.url">{{
-									item.more_info_link.title
-								}}</a>
+								<a
+									v-if="item.more_info_link?.url"
+									class="knife-product-card__link"
+									target="_blank"
+									rel="noopener"
+									:href="item.more_info_link.url"
+									@click.stop>
+									{{ item.more_info_link.title }}
+								</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div v-if="isShowModal" @click="hideModal()" class="carousel-overlay"></div>
-		<ProductModal
-			v-if="isShowModal"
-			:price="price"
-			:discount="discount"
-			:item="modalItem"
-			@close-modal="isShowModal = false" />
+		<Transition name="product-modal-fade">
+			<div v-if="isShowModal" @click="hideModal()" class="carousel-overlay"></div>
+		</Transition>
+		<Transition name="product-modal-shell">
+			<ProductModal
+				v-if="isShowModal"
+				:price="price"
+				:discount="discount"
+				:item="modalItem"
+				@close-modal="isShowModal = false" />
+		</Transition>
 	</div>
 </template>
 
-<script>
-import ProductModal from '~/components/ProductModal.vue';
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-	components: {
-		ProductModal,
-	},
-	data() {
-		return {
-			content: null,
-			showFooter: false,
-			imageUrl: {},
-			onHoverId: null,
-			isShowModal: false,
-			price: '',
-			discount: '',
-			modalItem: {},
-			topBanner: {
-				title: 'Yoshimune Japanese Knives',
-				desc: 'The trusted place to buy high quality Japanese kitchen knives in Malaysia',
-			},
-		};
-	},
-	methods: {
-		formatPrice(price) {
-			return `RM${this.formatNumber(price)}`;
-		},
-		calculateDiscount(sellingPrice, retailPrice) {
-			if (parseFloat(sellingPrice) < parseFloat(retailPrice)) {
-				const discountPercentage = (((retailPrice - sellingPrice) / retailPrice) * 100).toFixed(0);
-				return `${discountPercentage}`;
-			}
-			return '';
-		},
-		showModal(price, discount, item) {
-			this.isShowModal = true;
-			this.price = price;
-			this.discount = discount;
-			this.modalItem = item;
-		},
-		hideModal() {
-			this.isShowModal = false;
-		},
-	},
-});
-</script>
-
 <script setup>
+import ProductModal from '~/components/ProductModal.vue';
 import { useKnives } from '~/store/knives';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 const { locale, t } = useI18n();
+const isShowModal = ref(false);
+const price = ref('');
+const discount = ref('');
+const modalItem = ref({});
 
 const images = {
 	bannerTop: '/img/knives_banner.png',
 	gShockBanner: '/img/g-shock_banner.png',
+};
+const knivesHeroStyle = {
+	'--page-hero-image': `url(${images.bannerTop})`,
 };
 // const props = defineProps(['images']);
 
@@ -162,19 +150,24 @@ function formatNumber(number) {
 	return parseFloat(number).toFixed(2);
 }
 
-function initKnivesProp() {
-	getKnivesList()?.forEach((item, index) => {
-		item.displayImage = item.image[0].url;
-		item.isPreview = false;
-	});
-}
-function showPreview(index, isShow = true) {
-	const item = getKnivesList()[index];
-	item.isPreview = isShow;
-	item.displayImage = isShow ? item.image[1].url : item.image[0].url;
+function showModal(priceValue, discountValue, item) {
+	isShowModal.value = true;
+	price.value = priceValue;
+	discount.value = discountValue;
+	modalItem.value = item;
 }
 
-initKnivesProp();
+function hideModal() {
+	isShowModal.value = false;
+}
+
+function openKnifeModal(item) {
+	showModal(
+		formatPrice(item.selling_price),
+		calculateDiscount(item.selling_price, item.retail_price),
+		item,
+	);
+}
 
 useSeoMeta({
 	title: t('seo.title'),
@@ -187,215 +180,376 @@ useSeoMeta({
 </script>
 
 <style scoped>
-.flex__container {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-evenly;
-	padding: 30px 0;
-	align-items: center;
+.knife-products-container {
+	margin-top: clamp(1rem, 3vw, 2rem);
+	max-width: var(--tk-content-max);
+	width: min(calc(100% - 2rem), var(--tk-content-max));
 }
 
-.flex-container > div {
-	flex-basis: calc(25% - 20px);
-}
-
-.flex__item {
-	text-align: center;
-}
-
-.banner__text {
-	text-align: center;
-}
-
-.back {
-	cursor: pointer;
-}
-
-.flex-wrapper {
-	display: flex;
-	flex-wrap: wrap;
+.knife-products-grid {
+	align-items: stretch;
+	display: grid;
+	gap: clamp(0.75rem, 1.6vw, 1.25rem);
+	grid-template-columns: repeat(4, minmax(0, 1fr));
 	width: 100%;
-	gap: 20px;
 }
 
-.box {
-	flex-basis: calc(25% - 20px);
-	display: flex;
-	flex-direction: column;
-	position: relative;
-	background: #eeeded;
+.knife-product-card {
+	background: linear-gradient(180deg, rgb(var(--tk-color-white-rgb) / 92%), var(--tk-color-paper)),
+		var(--tk-color-paper);
+	border: 1px solid rgb(var(--tk-color-ink-rgb) / 11%);
+	border-radius: 8px;
+	box-shadow:
+		0 0.65rem 1.6rem rgb(var(--tk-color-ink-rgb) / 8%),
+		0 0.08rem 0 rgb(var(--tk-color-white-rgb) / 80%) inset;
 	cursor: pointer;
-}
-
-.box-image {
-	width: 100%;
+	display: grid;
+	grid-template-rows: auto 1fr;
+	isolation: isolate;
+	min-width: 0;
 	overflow: hidden;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	position: relative;
+	transition:
+		background-color 220ms ease,
+		border-color 220ms ease,
+		box-shadow 260ms ease,
+		transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.knife-product-card:hover,
+.knife-product-card:focus-visible {
+	border-color: rgb(var(--tk-color-brand-brown-rgb) / 32%);
+	box-shadow:
+		0 1.2rem 2.8rem rgb(var(--tk-color-ink-rgb) / 15%),
+		0 0 0 1px rgb(var(--tk-color-event-gold-rgb) / 18%) inset;
+	transform: translate3d(0, -6px, 0);
+}
+
+.knife-product-card:focus-visible {
+	outline: 3px solid rgb(var(--tk-color-event-gold-rgb) / 70%);
+	outline-offset: 3px;
+}
+
+.knife-product-card__image {
+	aspect-ratio: 1 / 1;
+	background: linear-gradient(
+			135deg,
+			rgb(var(--tk-color-ink-rgb) / 94%),
+			rgb(var(--tk-color-ink-rgb) / 72%)
+		),
+		var(--tk-color-sumi);
+	overflow: hidden;
 	position: relative;
 }
 
-.box-image-btn {
+.knife-product-card__image::after {
+	background: linear-gradient(
+		120deg,
+		transparent 0%,
+		rgb(var(--tk-color-white-rgb) / 0%) 38%,
+		rgb(var(--tk-color-white-rgb) / 28%) 50%,
+		rgb(var(--tk-color-white-rgb) / 0%) 62%,
+		transparent 100%
+	);
+	content: '';
+	inset: 0;
+	opacity: 0;
 	position: absolute;
-	margin: auto;
+	transform: translate3d(-40%, 0, 0);
+	transition:
+		opacity 260ms ease,
+		transform 650ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	z-index: 2;
 }
 
-.product h2 {
-	line-height: 20px;
-	font-size: 1rem;
+.knife-product-card__image-layer {
+	display: block;
+	height: 100%;
+	object-fit: cover;
+	position: absolute;
+	inset: 0;
+	transition:
+		opacity 280ms ease,
+		transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	width: 100%;
+}
+
+.knife-product-card__image-layer--primary {
+	z-index: 0;
+}
+
+.knife-product-card__image-layer--secondary {
+	opacity: 0;
+	z-index: 1;
+}
+
+.knife-product-card__image-shade {
+	background: linear-gradient(
+		180deg,
+		rgb(var(--tk-color-ink-rgb) / 0%) 34%,
+		rgb(var(--tk-color-ink-rgb) / 48%) 100%
+	);
+	inset: 0;
+	opacity: 0;
+	position: absolute;
+	transition: opacity 260ms ease;
+	z-index: 1;
+}
+
+.knife-product-card__hover-action {
+	box-shadow: 0 0.8rem 1.4rem rgb(var(--tk-color-ink-rgb) / 26%);
+	inset: 50% auto auto 50%;
+	left: 50%;
+	opacity: 0;
+	position: absolute;
+	transform: translate3d(-50%, -50%, 0) scale(0.96);
+	transition:
+		opacity 220ms ease,
+		transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	white-space: nowrap;
+	z-index: 3;
+}
+
+.knife-product-card__content {
+	display: grid;
+	gap: clamp(0.55rem, 1.1vw, 0.8rem);
+	grid-template-rows: auto auto;
+	padding: clamp(0.85rem, 1.35vw, 1.1rem);
+}
+
+.knife-product-card__title {
+	display: grid;
+	gap: 0.2rem;
+}
+
+.knife-product-card__brand {
+	color: var(--tk-color-muted) !important;
+	font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+	font-weight: 700;
+	line-height: 1.15;
+	margin: 0 !important;
 	text-align: left;
 }
 
-.product h2,
-.price {
+.knife-product-card__model {
+	color: var(--tk-color-sumi) !important;
+	font-size: clamp(0.98rem, 1.25vw, 1.1rem);
+	font-weight: 700;
+	line-height: 1.2;
 	margin: 0 !important;
-	color: #393646 !important;
-	font-size: 1rem;
-	font-weight: bold;
+	text-align: left;
+	text-wrap: balance;
 }
 
-.product p,
-.product a {
+.knife-product-card__meta {
+	align-content: start;
+	color: var(--tk-color-muted);
+	display: grid;
+	font-size: clamp(0.78rem, 1vw, 0.92rem);
+	gap: 0.42rem;
+	line-height: 1.35;
+	padding-top: clamp(0.15rem, 0.6vw, 0.35rem);
+}
+
+.knife-product-card__meta p,
+.knife-product-card__meta a {
+	color: inherit;
 	display: block;
-	color: #4f4557;
 	margin: 0;
 }
 
+.knife-product-card__attribute {
+	background: transparent;
+	border: 0;
+	color: var(--tk-color-muted);
+	font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+	justify-self: start;
+	max-width: 100%;
+	overflow: hidden;
+	padding: 0.18rem 0;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.knife-product-card__price {
+	align-items: baseline;
+	border-top: 1px solid rgb(var(--tk-color-ink-rgb) / 9%);
+	color: var(--tk-color-sumi) !important;
+	display: flex !important;
+	font-size: clamp(1.02rem, 1.35vw, 1.18rem);
+	flex-wrap: wrap;
+	font-weight: 800;
+	gap: 0.4rem;
+	line-height: 1.1;
+	margin: 0 !important;
+	padding-top: clamp(0.48rem, 1vw, 0.65rem);
+	text-align: left;
+}
+
 .retail-price {
+	color: rgb(var(--tk-color-ink-rgb) / 55%);
 	text-decoration: line-through;
 	text-decoration-thickness: auto;
 }
 
-.product__cta {
-	display: flex;
-	justify-content: center;
-}
-
-.product-desc {
-	margin: 20px 0;
-}
-
 .discount-percent-text {
-	color: red;
+	background: rgb(var(--tk-color-event-red-rgb) / 8%);
+	border-radius: 999px;
+	color: var(--tk-color-event-red);
+	display: inline-flex;
 	font-weight: bold;
-	font-size: 1rem;
-	padding: 0 8px;
+	line-height: 1;
+	padding: 0.24rem 0.42rem;
 }
 
-.product__content {
-	padding: 10px;
+.knife-product-card__link {
+	color: var(--tk-color-brand-brown) !important;
+	font-weight: 700;
+	text-decoration: underline;
+	text-decoration-color: rgb(var(--tk-color-brand-brown-rgb) / 28%);
+	text-underline-offset: 0.18em;
 }
 
-.product__tag {
-	box-shadow:
-		rgba(60, 64, 67, 0.3) 0 1px 2px 0,
-		rgba(60, 64, 67, 0.15) 0 1px 3px 1px;
+.knife-product-card__tag {
+	-webkit-backdrop-filter: blur(14px);
+	backdrop-filter: blur(14px);
+	background: rgb(var(--tk-color-white-rgb) / 84%);
+	border: 1px solid rgb(var(--tk-color-white-rgb) / 64%);
+	border-radius: 999px;
+	box-shadow: 0 0.6rem 1.2rem rgb(var(--tk-color-ink-rgb) / 14%);
+	color: var(--tk-color-ink);
+	font-size: clamp(0.7rem, 0.92vw, 0.82rem);
+	font-weight: 800;
+	left: 0.7rem;
+	line-height: 1;
+	padding: 0.45rem 0.6rem;
 	position: absolute;
-	padding: 5px;
+	top: 0.7rem;
 	width: fit-content;
-	background-color: rgb(240, 248, 255, 0.5);
-	margin-top: 5px;
-	margin-left: 5px;
+	z-index: 4;
 }
 
-.product__tag > p {
-	text-align: center;
-	padding: 0 3px;
-	font-weight: 600;
-}
-
-.top__banner {
-	width: 100%;
-	object-fit: cover;
-	object-position: 50% 20%;
-	overflow: hidden;
-	background-size: cover;
-	height: 130px;
-	margin-bottom: 30px;
-	display: flex;
-	justify-content: center;
-	flex-direction: column;
-}
-
-.top__banner > h1,
-.top__banner > h2 {
-	text-transform: none;
-	margin: 0;
-	max-width: 1280px;
-	margin: 0 auto;
-}
-
-.top__banner > h1 {
-	font-weight: 600;
-	font-size: 1.8rem;
-	line-height: normal;
-}
-
-.bottom__banner {
-	object-fit: cover;
-	object-position: 50% 20%;
-	overflow: hidden;
-	background-size: cover;
-	height: 130px;
-	background-color: #f8f6f1;
-}
-
-.product_brand_name {
-	min-height: 60px;
-}
-
-.heading__h2 {
-	line-height: 22px;
-}
-
-@media only screen and (max-width: 576px) {
-	.flex-wrapper {
-		gap: 5px;
-		justify-content: center;
+@media (hover: hover) {
+	.knife-product-card:hover .knife-product-card__image::after {
+		opacity: 1;
+		transform: translate3d(38%, 0, 0);
 	}
 
-	.box {
-		flex-basis: calc(50% - 10px);
+	.knife-product-card:hover .knife-product-card__image-layer,
+	.knife-product-card:focus-visible .knife-product-card__image-layer {
+		transform: scale(1.045);
 	}
 
-	.bottom__banner {
-		height: 210px;
+	.knife-product-card:hover .knife-product-card__image-layer--secondary,
+	.knife-product-card:focus-visible .knife-product-card__image-layer--secondary {
+		opacity: 1;
 	}
 
-	.flex__item {
-		flex-basis: calc(50% - 10px);
-		flex-grow: 1;
+	.knife-product-card:hover .knife-product-card__image-shade,
+	.knife-product-card:focus-visible .knife-product-card__image-shade {
+		opacity: 1;
 	}
 
-	.flex__item:nth-child(1) {
-		order: 1;
-	}
-
-	.flex__item:nth-child(2) {
-		order: 3;
-	}
-
-	.flex__item:nth-child(3) {
-		order: 2;
-	}
-
-	.top__banner > h1 {
-		font-size: 1.6rem;
+	.knife-product-card:hover .knife-product-card__hover-action,
+	.knife-product-card:focus-visible .knife-product-card__hover-action,
+	.knife-product-card:focus-within .knife-product-card__hover-action {
+		opacity: 1;
+		transform: translate3d(-50%, -50%, 0) scale(1);
 	}
 }
 
-.banner__icon {
-	margin-bottom: 5px;
+@media (prefers-reduced-motion: reduce) {
+	.knife-product-card,
+	.knife-product-card::before,
+	.knife-product-card__image::after,
+	.knife-product-card__image-layer,
+	.knife-product-card__image-shade,
+	.knife-product-card__hover-action {
+		transition-duration: 1ms;
+	}
+
+	.knife-product-card:hover,
+	.knife-product-card:focus-visible,
+	.knife-product-card:hover .knife-product-card__image-layer,
+	.knife-product-card:focus-visible .knife-product-card__image-layer {
+		transform: none;
+	}
+}
+
+@media only screen and (max-width: 1120px) {
+	.knife-products-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media only screen and (max-width: 640px) {
+	.knife-products-container {
+		width: min(calc(100% - 1.5rem), var(--tk-content-max));
+	}
+
+	.knife-products-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.knife-product-card__content {
+		padding: 0.75rem;
+	}
+}
+
+@media only screen and (max-width: 340px) {
+	.knife-products-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.knife-products-container {
+		width: min(calc(100% - 1rem), var(--tk-content-max));
+	}
 }
 
 .carousel-overlay {
+	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(8px);
+	background-color: rgb(var(--tk-color-ink-rgb) / 62%);
 	position: fixed;
-	top: 0;
-	left: 0;
+	inset: 0;
 	width: 100%;
 	height: 100%;
-	z-index: 9998; /* Adjust as needed */
-	background-color: rgba(0, 0, 0, 0.5); /* Adjust the background color and opacity */
+	z-index: 9998;
+	transition: opacity 220ms ease;
+}
+
+.product-modal-fade-enter-active,
+.product-modal-fade-leave-active,
+.product-modal-shell-enter-active,
+.product-modal-shell-leave-active {
+	transition:
+		opacity 220ms ease,
+		transform 220ms ease;
+}
+
+.product-modal-fade-enter-from,
+.product-modal-fade-leave-to {
+	opacity: 0;
+}
+
+.product-modal-shell-enter-from,
+.product-modal-shell-leave-to {
+	opacity: 0;
+	transform: translate3d(-50%, -50%, 0) translateY(0.75rem) scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.carousel-overlay,
+	.product-modal-fade-enter-active,
+	.product-modal-fade-leave-active,
+	.product-modal-shell-enter-active,
+	.product-modal-shell-leave-active {
+		transition: none;
+	}
+
+	.product-modal-shell-enter-from,
+	.product-modal-shell-leave-to {
+		transform: translate3d(-50%, -50%, 0);
+	}
 }
 </style>

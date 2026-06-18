@@ -1,22 +1,35 @@
 <template>
 	<div>
-		<!-- Hero Section -->
-		<div
-			class="hero min-h-screen bg-cover bg-center flex sm:justify-end sm:items-end"
-			style="background-image: url('/img/hero_bg.jpg')">
-			<div
-				class="hero-content card bg-[rgba(39,34,34,0.57)] max-w-md p-4 text-center mr-5 ml-5 sm:mb-12 sm:mr-24">
-				<h1 class="text-4xl font-bold text-base-100">
-					{{ getHomeList().main_title }}
-				</h1>
-				<p class="py-6 text-base-100">
-					{{ getHomeList().tagline }}
-				</p>
-				<button @click="doHeroAction()" class="btn btn-primary">
-					{{ $t('hero.button') }}
-				</button>
+		<section class="takumi-hero" :style="heroImageStyle" aria-labelledby="home-hero-title">
+			<div class="takumi-hero__inner">
+				<article class="takumi-hero-card">
+					<span
+						class="takumi-hero-card__backing-tab takumi-hero-card__backing-tab--bottom"
+						aria-hidden="true"></span>
+					<span class="takumi-hero-card__fold" aria-hidden="true"></span>
+					<h1 id="home-hero-title" class="takumi-hero-card__title">
+						{{ getHomeList().main_title }}
+					</h1>
+					<hr class="takumi-hero-card__mark" />
+					<p class="takumi-hero-card__copy">
+						{{ getHomeList().tagline }}
+					</p>
+					<div class="takumi-hero-card__footer">
+						<button type="button" class="takumi-hero-card__button" @click="doHeroAction">
+							{{ t('hero.button') }}
+							<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path
+									d="M5 12h13m-5-5 5 5-5 5"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round" />
+							</svg>
+						</button>
+					</div>
+				</article>
 			</div>
-		</div>
+		</section>
 
 		<!-- Features Section -->
 		<div id="features" class="py-12 bg-base-100">
@@ -63,62 +76,19 @@
 		</div>
 
 		<!-- News Section -->
-		<div class="py-12 bg-neutral">
-			<div class="w-container">
-				<h1 class="text-4xl font-bold text-center">
+		<div class="takumi-news-section bg-neutral">
+			<div class="takumi-news-section__inner">
+				<h1 class="takumi-news-section__title">
 					{{ $t('news.title') }}
 				</h1>
-				<div
-					class="mt-10 flex flex-col lg:flex-row gap-10 items-start items-center lg:items-stretch lg:justify-center md:my-16">
-					<!-- News Cards -->
-					<div
+				<div class="takumi-news-section__grid">
+					<NewsCard
 						v-for="(item, index) in getNewsList().slice(0, 3)"
-						class="card w-11/12 sm:w-96 bg-base-200 border border-base-200 flex flex-grow">
-						<!-- Card -->
-						<NuxtLink :to="localePath({ path: `news/${item.slug}/` })" no-prefetch>
-							<!-- Image -->
-							<div class="flex flex-col bg-base-200 rounded-box max-w-xl">
-								<figure class="w-full h-48 overflow-hidden bg-base-100">
-									<img
-										v-if="item.thumbnail.url"
-										:src="item.thumbnail.url"
-										alt="Image"
-										class="w-full h-full object-cover" />
-									<img
-										v-else
-										:src="'/img/takumi-ogp.png'"
-										alt="Default Image"
-										class="w-full h-full object-cover" />
-								</figure>
-								<!-- item.hero.hero_image.url -->
-								<!-- <div class="bg-[url('{/backgrounds/forest.jpg}')] bg-center rounded-t-box w-full h-72"></div> -->
-
-								<!-- Body-->
-								<div class="flex flex-col gap-6 p-6">
-									<h3 class="text-primary font-medium">{{ item.news.category }}</h3>
-
-									<div class="link link-hover text-xl font-bold">{{ item.news.headline }}</div>
-
-									<span>
-										{{ item.news.intro }}
-									</span>
-
-									<div class="flex gap-2 justify-between items-center">
-										<a class="btn btn-ghost">
-											<!-- <img alt="Profile" src="/avatar.png" class="w-8 rounded-full" /> -->
-
-											<!-- <span class="font-medium text-sm">User Name</span> -->
-										</a>
-
-										<!-- <span class="text-sm">{{ item.ymd }}</span> -->
-									</div>
-								</div>
-							</div>
-						</NuxtLink>
-					</div>
+						:key="item.slug || index"
+						:item="item"
+						:to="localePath({ path: `news/${item.slug}/` })" />
 				</div>
-				<div
-					class="mt-10 flex flex-col lg:flex-row gap-10 items-start items-center lg:justify-end md:my-16">
+				<div class="takumi-news-section__actions">
 					<NuxtLink :to="localePath({ path: `newslist` })" no-prefetch>
 						<button class="btn btn-primary">{{ $t('news.more') }}</button>
 					</NuxtLink>
@@ -216,7 +186,7 @@
 		</div>
 
 		<!-- Contact Section -->
-		<div class="py-12 bg-neutral" id="contact">
+		<div class="home-contact-section py-12 bg-neutral" id="contact">
 			<div class="w-container">
 				<div class="flex flex-col items-center w-full py-3">
 					<h1 class="text-4xl font-bold text-center">
@@ -293,9 +263,391 @@
 </template>
 
 <style scoped>
+.home-contact-section {
+	scroll-margin-top: calc(var(--tk-fixed-header-height) + 1rem);
+}
+
+.takumi-hero {
+	background-color: var(--tk-color-sumi);
+	background-image: var(--tk-hero-image);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	height: 100svh;
+	isolation: isolate;
+	min-height: 100svh;
+	overflow: hidden;
+	padding-top: 0;
+	position: relative;
+}
+
+.takumi-hero::before {
+	background: linear-gradient(
+			90deg,
+			rgb(var(--tk-color-ink-rgb) / 18%),
+			rgb(var(--tk-color-ink-rgb) / 4%) 45%,
+			rgb(var(--tk-color-brand-brown-rgb) / 8%) 75%,
+			rgba(255, 246, 228, 0.14)
+		),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgb(var(--tk-color-ink-rgb) / 10%));
+	content: '';
+	inset: 0;
+	pointer-events: none;
+	position: absolute;
+	z-index: -3;
+}
+
+.takumi-hero__inner {
+	align-items: center;
+	box-sizing: border-box;
+	display: grid;
+	gap: clamp(2rem, 5vw, 5rem);
+	grid-template-columns: minmax(18rem, 1fr) minmax(34rem, 42rem);
+	justify-items: end;
+	margin-inline: auto;
+	min-height: 100svh;
+	padding-block: clamp(9.5rem, 20vh, 13.5rem) clamp(4rem, 8vh, 6rem);
+	position: relative;
+	width: min(calc(100% - calc(var(--tk-space-gutter) * 2)), 88rem);
+	z-index: 5;
+}
+
+.takumi-hero-card {
+	--tk-hero-corner-cut: clamp(3.8rem, 6vw, 5.2rem);
+	--tk-hero-corner-radius: clamp(1.15rem, 1.8vw, 1.8rem);
+	background:
+		linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.18),
+			rgba(255, 255, 255, 0.08) 42%,
+			rgba(255, 255, 255, 0.035)
+		),
+		linear-gradient(
+			118deg,
+			rgba(255, 246, 228, 0.18),
+			rgba(251, 251, 248, 0.055) 40%,
+			rgba(199, 154, 67, 0.035)
+		),
+		url('/img/takumi-washi-glass/pattern-washi-glass.svg') center / 720px 720px repeat;
+	background-blend-mode: normal, soft-light, soft-light;
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	border-radius: var(--tk-hero-corner-radius);
+	box-shadow:
+		0 30px 84px rgb(var(--tk-color-ink-rgb) / 18%),
+		inset 0 1px 0 rgba(255, 255, 255, 0.42),
+		inset 0 -18px 54px rgba(255, 255, 255, 0.06),
+		inset 0 28px 82px rgba(255, 255, 255, 0.12);
+	clip-path: polygon(
+		var(--tk-hero-corner-radius) 0,
+		calc(100% - var(--tk-hero-corner-cut)) 0,
+		100% var(--tk-hero-corner-cut),
+		100% calc(100% - var(--tk-hero-corner-radius)),
+		calc(100% - var(--tk-hero-corner-radius)) 100%,
+		var(--tk-hero-corner-radius) 100%,
+		0 calc(100% - var(--tk-hero-corner-radius)),
+		0 var(--tk-hero-corner-radius)
+	);
+	color: var(--tk-color-ink);
+	display: grid;
+	grid-column: 2;
+	grid-template-areas: 'title' 'mark' 'copy' 'footer';
+	grid-template-columns: 1fr;
+	justify-self: end;
+	margin-inline: 0;
+	min-height: clamp(27rem, 52vh, 34.5rem);
+	overflow: visible;
+	padding: clamp(3.25rem, 5.2vw, 4.4rem) clamp(2rem, 4vw, 3.6rem) clamp(2rem, 3.6vw, 3rem);
+	position: relative;
+	width: min(100%, 42rem);
+	backdrop-filter: blur(18px) saturate(160%) contrast(102%);
+	-webkit-backdrop-filter: blur(18px) saturate(160%) contrast(102%);
+}
+
+.takumi-hero-card::before {
+	background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.22),
+			rgba(255, 255, 255, 0.08) 34%,
+			transparent 68%
+		),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 54%);
+	content: '';
+	inset: 0;
+	pointer-events: none;
+	position: absolute;
+	z-index: 0;
+}
+
+.takumi-hero-card::after {
+	background: rgba(199, 154, 67, 0.28);
+	box-shadow: 0 16px 32px rgb(var(--tk-color-brand-brown-rgb) / 18%);
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 28% 100%);
+	content: '';
+	height: clamp(4.7rem, 8vw, 6.2rem);
+	pointer-events: none;
+	position: absolute;
+	right: -1.2rem;
+	top: clamp(2.35rem, 5vw, 3.65rem);
+	width: clamp(4.3rem, 7vw, 5.5rem);
+	z-index: -1;
+}
+
+.takumi-hero-card__backing-tab {
+	background: rgba(199, 154, 67, 0.24);
+	box-shadow: 0 12px 26px rgb(var(--tk-color-brand-brown-rgb) / 15%);
+	pointer-events: none;
+	position: absolute;
+	z-index: -1;
+}
+
+.takumi-hero-card__backing-tab--bottom {
+	bottom: -1rem;
+	clip-path: polygon(0 0, 100% 100%, 0 100%);
+	height: clamp(4.2rem, 7vw, 5.45rem);
+	left: -0.95rem;
+	width: clamp(4.2rem, 7vw, 5.45rem);
+}
+
+.takumi-hero-card__fold {
+	background:
+		linear-gradient(225deg, rgba(238, 214, 167, 0.36) 0 49%, rgba(255, 255, 255, 0.16) 50%),
+		url('/img/takumi-washi-glass/pattern-washi.svg') center / 720px 720px repeat;
+	border-right: 1px solid rgba(199, 154, 67, 0.62);
+	border-top: 1px solid rgba(199, 154, 67, 0.62);
+	clip-path: polygon(0 0, 100% 100%, 100% 0);
+	filter: drop-shadow(-0.25rem 0.32rem 0.18rem rgb(var(--tk-color-brand-brown-rgb) / 8%));
+	height: var(--tk-hero-corner-cut);
+	pointer-events: none;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: var(--tk-hero-corner-cut);
+	z-index: 3;
+}
+
+.takumi-hero-card__title {
+	color: var(--tk-color-ink);
+	font-family: 'Cormorant Garamond', 'Noto Serif JP', Georgia, serif;
+	font-size: clamp(2.75rem, 4.1vw, 4.4rem);
+	grid-area: title;
+	letter-spacing: 0;
+	line-height: 0.96;
+	margin: 0;
+	max-width: 18ch;
+}
+
+.takumi-hero-card__mark {
+	background: var(--tk-color-event-gold);
+	border: 0;
+	grid-area: mark;
+	height: 2px;
+	margin: clamp(1.5rem, 2.8vw, 2.2rem) 0 clamp(1.35rem, 2.5vw, 1.9rem);
+	width: 3.9rem;
+}
+
+.takumi-hero-card__copy {
+	color: rgb(var(--tk-color-ink-rgb) / 82%);
+	font-size: clamp(1rem, 1.2vw, 1.14rem);
+	grid-area: copy;
+	line-height: 1.68;
+	margin: 0;
+	max-width: 29rem;
+}
+
+.takumi-hero-card__footer {
+	align-items: flex-end;
+	display: flex;
+	gap: clamp(1rem, 2vw, 2rem);
+	grid-area: footer;
+	justify-content: flex-start;
+	margin-top: clamp(1.6rem, 3vw, 2.45rem);
+	position: relative;
+	z-index: 3;
+}
+
+.takumi-hero-card__button {
+	align-items: center;
+	background: linear-gradient(135deg, var(--tk-color-event-red), var(--tk-color-brand-brown));
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	border-radius: 999px;
+	box-shadow:
+		0 17px 38px rgb(var(--tk-color-brand-brown-rgb) / 30%),
+		inset 0 1px 0 rgba(255, 255, 255, 0.24);
+	color: var(--tk-color-white);
+	display: inline-flex;
+	font-size: clamp(0.95rem, 1vw, 1.08rem);
+	font-weight: 850;
+	gap: 0.75rem;
+	justify-content: center;
+	margin-top: 0;
+	min-height: clamp(3.15rem, 4vw, 3.7rem);
+	min-width: clamp(12rem, 14vw, 14.2rem);
+	padding: 0 1.9rem 0 2.15rem;
+	position: relative;
+	text-decoration: none;
+	transition:
+		box-shadow 0.24s ease,
+		filter 0.24s ease,
+		transform 0.24s ease;
+	z-index: 1;
+}
+
+.takumi-hero-card__button:hover {
+	box-shadow:
+		0 22px 46px rgb(var(--tk-color-brand-brown-rgb) / 38%),
+		inset 0 1px 0 rgba(255, 255, 255, 0.28);
+	filter: saturate(1.08);
+	transform: translateY(-2px);
+}
+
+.takumi-hero-card__button:focus-visible {
+	outline: 3px solid rgba(199, 154, 67, 0.72);
+	outline-offset: 3px;
+}
+
+.takumi-hero-card__button svg {
+	height: 1.1rem;
+	width: 1.1rem;
+}
+
+.takumi-hero-card__title,
+.takumi-hero-card__mark,
+.takumi-hero-card__copy,
+.takumi-hero-card__footer {
+	position: relative;
+	z-index: 2;
+}
+
 .takumi-map {
 	width: 600px;
 }
+
+.takumi-news-section {
+	padding: var(--tk-space-section) 0;
+}
+
+.takumi-news-section__inner {
+	width: min(calc(100% - 1.5rem), var(--tk-content-max));
+	margin: 0 auto;
+}
+
+.takumi-news-section__title {
+	margin: 0;
+	color: var(--tk-color-sumi);
+	font-size: clamp(2.35rem, 9vw, 4rem);
+	font-weight: 800;
+	line-height: 1.05;
+	text-align: center;
+}
+
+.takumi-news-section__grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: clamp(1rem, 4vw, 1.5rem);
+	margin-top: clamp(2rem, 8vw, 3.5rem);
+}
+
+.takumi-news-section__actions {
+	display: flex;
+	justify-content: center;
+	margin-top: clamp(1.5rem, 5vw, 2.5rem);
+}
+
+@media (min-width: 768px) {
+	.takumi-news-section__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 1024px) {
+	.takumi-news-section__grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.takumi-news-section__actions {
+		justify-content: flex-end;
+	}
+}
+
+@media (max-width: 980px) {
+	.takumi-hero__inner {
+		grid-template-columns: 1fr;
+		justify-items: stretch;
+		min-height: auto;
+		padding-block: clamp(8.5rem, 24vw, 10.5rem) 5rem;
+		width: min(calc(100% - 2rem), 46rem);
+	}
+
+	.takumi-hero-card {
+		--tk-hero-corner-cut: 4.6rem;
+		grid-column: 1;
+		grid-template-columns: 1fr;
+		justify-self: stretch;
+		min-height: auto;
+		padding: 4.8rem clamp(1.6rem, 5vw, 3rem) 3rem;
+		width: 100%;
+	}
+}
+
+@media (max-width: 620px) {
+	.takumi-hero {
+		height: auto;
+		min-height: 100svh;
+	}
+
+	.takumi-hero__inner {
+		align-items: flex-start;
+		padding-block: clamp(9rem, 38vw, 10rem) 4.6rem;
+	}
+
+	.takumi-hero-card {
+		--tk-hero-corner-cut: 3.8rem;
+		--tk-hero-corner-radius: 1.15rem;
+		grid-template-areas:
+			'title'
+			'mark'
+			'copy'
+			'footer';
+		grid-template-columns: 1fr;
+		padding: 3.8rem 1.35rem 2rem;
+	}
+
+	.takumi-hero-card::before {
+		border-radius: var(--tk-hero-corner-radius);
+	}
+
+	.takumi-hero-card::after,
+	.takumi-hero-card__backing-tab--bottom {
+		display: none;
+	}
+
+	.takumi-hero-card__fold {
+		height: 3.8rem;
+		width: 3.8rem;
+	}
+
+	.takumi-hero-card__title {
+		font-size: clamp(2.35rem, 12vw, 3.35rem);
+		max-width: 10.8ch;
+	}
+
+	.takumi-hero-card__copy {
+		font-size: 0.98rem;
+		max-width: none;
+	}
+
+	.takumi-hero-card__button {
+		min-width: 0;
+		width: 100%;
+	}
+}
+
+@supports not ((backdrop-filter: blur(1rem)) or (-webkit-backdrop-filter: blur(1rem))) {
+	.takumi-hero-card {
+		background: rgba(251, 251, 248, 0.96);
+	}
+}
+
 @media only screen and (max-width: 1024px) {
 	.takumi-map {
 		width: 100%;
@@ -446,6 +798,10 @@ const { locale, t } = useI18n();
 const newsList = useNews();
 const homeList = useHome();
 const router = useRouter();
+const heroImageSrc = '/img/hero_bg.jpg';
+const heroImageStyle = computed(() => ({
+	'--tk-hero-image': `url(${heroImageSrc})`,
+}));
 
 function getHomeList() {
 	return homeList.getList(locale.value);
