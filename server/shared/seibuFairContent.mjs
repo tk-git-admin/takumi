@@ -315,10 +315,21 @@ function readWorkshopItems(source) {
 	);
 }
 
+function readWorkshopOrderNumber(item) {
+	return asInteger(readField(item, 'order_no'), 0);
+}
+
 function mapWorkshopExperiences(source) {
 	return readWorkshopItems(source)
-		.map((item, index) => {
-			const fallbackId = `workshop-${asString(readField(item, 'topics_id')) || index + 1}`;
+		.map((item, sourceIndex) => ({ item, sourceIndex }))
+		.sort((left, right) => {
+			const orderDifference =
+				readWorkshopOrderNumber(right.item) - readWorkshopOrderNumber(left.item);
+
+			return orderDifference || left.sourceIndex - right.sourceIndex;
+		})
+		.map(({ item, sourceIndex }) => {
+			const fallbackId = `workshop-${asString(readField(item, 'topics_id')) || sourceIndex + 1}`;
 			const id = slugifyId(
 				readField(item, 'slug') ||
 					readField(item, 'subject') ||

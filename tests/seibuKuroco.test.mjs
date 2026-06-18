@@ -243,6 +243,48 @@ test('SEIBU workshop Kuroco fields are mapped into registration experiences', ()
 	assert.equal(normalized.stats.experiences, 2);
 });
 
+test('SEIBU workshop tabs sort by descending Kuroco order number', () => {
+	const normalized = normalizeSeibuEventSource({
+		list: [
+			{
+				topics_id: 53,
+				subject: 'Color Coordination',
+				slug: 'color-coordination',
+				order_no: 10,
+				workshop_heading: 'Color Coordination',
+				session_time: '11:00-12:00',
+				session_booking: '15',
+				session_date: ['June 20 (Sat)'],
+			},
+			{
+				topics_id: 51,
+				subject: 'Yukata',
+				slug: 'yukata',
+				order_no: 40,
+				workshop_heading: 'Yukata Dressing',
+				session_time: '13:00-14:00',
+				session_booking: '10',
+				session_date: ['June 20 (Sat)'],
+			},
+			{
+				topics_id: 52,
+				subject: 'Origami',
+				slug: 'origami',
+				order_no: '30',
+				workshop_heading: 'Origami Workshop',
+				session_time: '15:00-16:00',
+				session_booking: '10',
+				session_date: ['June 20 (Sat)'],
+			},
+		],
+	});
+
+	assert.deepEqual(
+		normalized.experiences.map((experience) => experience.id),
+		['yukata', 'origami', 'color-coordination'],
+	);
+});
+
 test('SEIBU workshop Japanese dates keep stable session ids', () => {
 	const normalized = normalizeSeibuEventSource(
 		{
