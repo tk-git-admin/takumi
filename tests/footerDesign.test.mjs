@@ -34,6 +34,10 @@ test('global footer uses Takumi design-system layout and accessible navigation',
 		footerSource,
 		/\.takumi-footer__inner\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1\.2fr\) minmax\(0, 0\.95fr\) minmax\(13rem, 0\.65fr\);/,
 	);
+	assert.match(
+		footerSource,
+		/\.takumi-footer__logo img\s*\{[\s\S]*?height:\s*48px;[\s\S]*?width:\s*auto;/,
+	);
 	assert.match(footerSource, /\.takumi-footer__link\s*\{[\s\S]*?min-height:\s*2\.75rem;/);
 	assert.match(
 		footerSource,

@@ -132,13 +132,12 @@ const socialLinks = [
 
 .takumi-footer__logo {
 	display: inline-flex;
-	width: min(11rem, 58vw);
 }
 
 .takumi-footer__logo img {
 	display: block;
-	height: auto;
-	width: 100%;
+	height: 48px;
+	width: auto;
 }
 
 .takumi-footer__kicker {

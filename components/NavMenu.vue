@@ -304,8 +304,7 @@ function getTextColor(path) {
 	gap: clamp(0.8rem, 2.2vw, 2.1rem);
 	grid-template-columns: minmax(120px, 190px) 1fr minmax(140px, 205px);
 	margin: 0 auto;
-	min-height: clamp(4.35rem, 5.6vw, 5.4rem);
-	padding-inline: clamp(1rem, 2.35vw, 2.85rem);
+	padding: 16px 0;
 	width: min(calc(100% - calc(var(--tk-space-gutter) * 2)), 88rem);
 }
 
@@ -318,13 +317,12 @@ function getTextColor(path) {
 	align-items: center;
 	color: var(--tk-color-brand-brown);
 	display: inline-flex;
-	width: 142px;
 }
 
 .takumi-nav-logo img {
 	display: block;
-	height: auto;
-	width: 100%;
+	height: 48px;
+	width: auto;
 }
 
 .takumi-nav-links {
@@ -474,15 +472,10 @@ function getTextColor(path) {
 	.takumi-nav-surface {
 		gap: 1rem;
 		grid-template-columns: 1fr auto;
-		min-height: 4.75rem;
 	}
 
 	.takumi-nav-links {
 		display: none;
-	}
-
-	.takumi-nav-logo {
-		width: 138px;
 	}
 
 	.takumi-language-switch__divider,
@@ -499,8 +492,6 @@ function getTextColor(path) {
 
 	.takumi-nav-surface {
 		border-radius: 0;
-		padding-inline: 1rem;
-		width: 100%;
 	}
 
 	.takumi-language-switch {

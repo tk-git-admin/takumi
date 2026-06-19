@@ -35,9 +35,9 @@
 		<div id="features" class="py-12 bg-base-100">
 			<div class="w-container mx-16">
 				<div class="flex flex-col items-center w-full py-3">
-					<h1 class="text-4xl font-bold text-center">
+					<h2 class="takumi-section-heading">
 						{{ getHomeList().intro.intro_title }}
-					</h1>
+					</h2>
 					<p class="py-6">{{ getHomeList().intro.intro_subtitle }}</p>
 				</div>
 
@@ -78,9 +78,9 @@
 		<!-- News Section -->
 		<div class="takumi-news-section bg-neutral">
 			<div class="takumi-news-section__inner">
-				<h1 class="takumi-news-section__title">
+				<h2 class="takumi-section-heading">
 					{{ $t('news.title') }}
-				</h1>
+				</h2>
 				<div class="takumi-news-section__grid">
 					<NewsCard
 						v-for="(item, index) in getNewsList().slice(0, 3)"
@@ -101,9 +101,9 @@
 			<div class="w-container md:mx-16">
 				<div class="flex flex-col items-start w-full lg:flex-row gap-12">
 					<div class="grid flex-grow h-70 lg:w-32 card">
-						<h1 class="text-4xl font-bold text-primary">
+						<h2 class="takumi-section-heading takumi-section-heading--left">
 							{{ getHomeList().info.info_subtitle }}
-						</h1>
+						</h2>
 						<p class="py-6">{{ getHomeList().info.info_desc }}</p>
 						<div v-for="(item, index) in getHomeList().services">
 							<div class="collapse collapse-arrow bg-base-200 my-1">
@@ -128,9 +128,9 @@
 		<div class="py-12">
 			<div class="w-container">
 				<div class="flex flex-col items-center w-full py-3">
-					<h1 class="text-4xl font-bold text-center">
+					<h2 class="takumi-section-heading">
 						{{ $t('corporate.title') }}
-					</h1>
+					</h2>
 				</div>
 				<!-- Content -->
 				<div class="flex flex-col lg:flex-row justify-between gap-12">
@@ -189,9 +189,9 @@
 		<div class="home-contact-section py-12 bg-neutral" id="contact">
 			<div class="w-container">
 				<div class="flex flex-col items-center w-full py-3">
-					<h1 class="text-4xl font-bold text-center">
+					<h2 class="takumi-section-heading">
 						{{ $t('contact.title') }}
-					</h1>
+					</h2>
 				</div>
 				<!-- Contact Form -->
 				<div class="flex flex-col items-center w-full">
@@ -265,6 +265,22 @@
 <style scoped>
 .home-contact-section {
 	scroll-margin-top: calc(var(--tk-fixed-header-height) + 1rem);
+}
+
+.takumi-section-heading {
+	color: var(--tk-color-sumi);
+	font-size: clamp(2.35rem, 9vw, 4rem);
+	font-weight: 800;
+	letter-spacing: 0;
+	line-height: 1.05;
+	margin: 0;
+	text-align: center;
+	text-transform: none;
+	text-wrap: balance;
+}
+
+.takumi-section-heading--left {
+	text-align: left;
 }
 
 .takumi-hero {
@@ -529,15 +545,6 @@
 .takumi-news-section__inner {
 	width: min(calc(100% - 1.5rem), var(--tk-content-max));
 	margin: 0 auto;
-}
-
-.takumi-news-section__title {
-	margin: 0;
-	color: var(--tk-color-sumi);
-	font-size: clamp(2.35rem, 9vw, 4rem);
-	font-weight: 800;
-	line-height: 1.05;
-	text-align: center;
 }
 
 .takumi-news-section__grid {

@@ -9,7 +9,7 @@ test('knife hero uses the shared full-height plain page hero contract', async ()
 
 	for (const token of [
 		'--tk-nav-announcement-height: 3rem;',
-		'--tk-nav-row-height: clamp(4.35rem, 5.6vw, 5.4rem);',
+		'--tk-nav-row-height: 5rem;',
 		'--tk-fixed-header-height: calc(var(--tk-nav-announcement-height) + var(--tk-nav-row-height));',
 		'--tk-page-hero-top-clearance: calc(var(--tk-fixed-header-height) + clamp(1rem, 2.5vw, 1.75rem));',
 	]) {

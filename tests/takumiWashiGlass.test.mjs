@@ -110,6 +110,30 @@ test('announcement bar uses the washi side ornament from public assets', async (
 	}
 });
 
+test('announcement bar centers text on mobile and tablet', async () => {
+	const announcementSource = await readFile(
+		new URL('../components/AnnouncementBar.vue', import.meta.url),
+		'utf8',
+	);
+	const tabletRule =
+		announcementSource.match(/@media \(max-width: 1023px\)\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+	const mobileRule =
+		announcementSource.match(/@media \(max-width: 767px\)\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+
+	assert.equal(
+		tabletRule.includes('justify-content: center;') && tabletRule.includes('text-align: center;'),
+		true,
+		'announcement content should stay centered across tablet widths',
+	);
+	assert.equal(
+		mobileRule.includes('justify-content: flex-start;') ||
+			mobileRule.includes('overflow-x: auto;') ||
+			mobileRule.includes('scrollbar-width: none;'),
+		false,
+		'mobile announcement should not fall back to left-aligned horizontal scrolling',
+	);
+});
+
 test('homepage hero CSS keeps the first viewport composed on desktop and mobile', async () => {
 	const pageSource = await readFile(new URL('../pages/index.vue', import.meta.url), 'utf8');
 	const invalidTokenAlphaPattern = /rgba\(var\(--tk-color-[^)]+-rgb\),\s*[\d.]+\)/;
@@ -400,9 +424,15 @@ test('global nav uses token-colored shell while preserving routes and mobile men
 			navSurfaceRule.includes('border-radius: 0;') &&
 			navSurfaceRule.includes('box-shadow: none;') &&
 			navSurfaceRule.includes('margin: 0 auto;') &&
+			navSurfaceRule.includes('padding: 16px 0;') &&
 			navSurfaceRule.includes('width: min(calc(100% - calc(var(--tk-space-gutter) * 2)), 88rem);'),
 		true,
 		'nav surface should be a content row inside the full-width shell, not a floating rounded card',
+	);
+	assert.equal(
+		navSurfaceRule.includes('min-height:'),
+		false,
+		'nav row spacing should come from padding, not min-height',
 	);
 	assert.equal(
 		!navSurfaceRule.includes('backdrop-filter:') &&
@@ -412,10 +442,40 @@ test('global nav uses token-colored shell while preserving routes and mobile men
 		true,
 		'nav should not use glassmorphism or a glass fallback block',
 	);
+	assert.match(
+		navSource,
+		/\.takumi-nav-logo img\s*\{[\s\S]*?height:\s*48px;[\s\S]*?width:\s*auto;/,
+	);
+});
+
+test('homepage keeps one h1 and standardizes secondary section heading typography', async () => {
+	const pageSource = await readFile(new URL('../pages/index.vue', import.meta.url), 'utf8');
+	const headingRule = pageSource.match(/\.takumi-section-heading\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+	const h1Matches = pageSource.match(/<h1\b/g) ?? [];
+
+	assert.equal(h1Matches.length, 1, 'homepage should expose a single h1');
+	assert.match(
+		pageSource,
+		/<h1 id="home-hero-title" class="takumi-hero-card__title">[\s\S]*?getHomeList\(\)\.main_title[\s\S]*?<\/h1>/,
+	);
+	for (const expectedSource of [
+		'<h2 class="takumi-section-heading">',
+		'<h2 class="takumi-section-heading takumi-section-heading--left">',
+		'{{ getHomeList().intro.intro_title }}',
+		"{{ $t('news.title') }}",
+		'{{ getHomeList().info.info_subtitle }}',
+		"{{ $t('corporate.title') }}",
+		"{{ $t('contact.title') }}",
+	]) {
+		assert.equal(pageSource.includes(expectedSource), true, expectedSource);
+	}
 	assert.equal(
-		navSurfaceRule.includes('min-height: clamp(4.35rem, 5.6vw, 5.4rem);'),
+		headingRule.includes('font-size: clamp(2.35rem, 9vw, 4rem);') &&
+			headingRule.includes('font-weight: 800;') &&
+			headingRule.includes('line-height: 1.05;') &&
+			headingRule.includes('text-transform: none;'),
 		true,
-		'nav row should remain compact so it does not dominate the first viewport',
+		'secondary homepage headings should share size, weight, line-height, and capitalization rules',
 	);
 });
 

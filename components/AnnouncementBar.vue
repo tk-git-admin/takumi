@@ -110,6 +110,8 @@ defineProps({
 }
 
 .announcement-bar__title {
+	flex: 0 1 auto;
+	min-width: 0;
 	overflow: hidden;
 	font-weight: 750;
 	letter-spacing: 0;
@@ -127,22 +129,22 @@ defineProps({
 	white-space: nowrap;
 }
 
+@media (max-width: 1023px) {
+	.announcement-bar {
+		justify-content: center;
+		text-align: center;
+	}
+}
+
 @media (max-width: 767px) {
 	.announcement-bar {
 		gap: 0.5rem;
-		justify-content: flex-start;
 		min-height: 2.75rem;
 		font-size: 0.78rem;
-		overflow-x: auto;
-		scrollbar-width: none;
-	}
-
-	.announcement-bar::-webkit-scrollbar {
-		display: none;
 	}
 
 	.announcement-bar__title {
-		max-width: 9rem;
+		max-width: min(15rem, 52vw);
 	}
 }
 </style>
