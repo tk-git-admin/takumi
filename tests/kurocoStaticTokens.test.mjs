@@ -87,6 +87,26 @@ test('Kuroco read requests use grouped static tokens and form submissions do not
 	);
 });
 
+test('homepage SSR content loader preserves request context for internal Kuroco routes', async () => {
+	const composable = await readProjectFile('composables/useTakumiContent.ts');
+
+	assert.match(composable, /const\s+requestFetch\s*=\s*useRequestFetch\(\)/);
+	assert.doesNotMatch(composable, /\$fetch<[^>]+>\(['"]\/api\/content\//);
+
+	for (const route of [
+		'/api/content/home',
+		'/api/content/news',
+		'/api/content/products',
+		'/api/content/knives',
+	]) {
+		assert.match(
+			composable,
+			new RegExp(`requestFetch<[^>]+>\\(['"]${route.replaceAll('/', '\\/')}['"]`),
+			`${route} should use the request-bound fetch during SSR`,
+		);
+	}
+});
+
 test('Kuroco token examples are empty and local secret files stay ignored', async () => {
 	const envExample = await readProjectFile('.env.example');
 	const gitignore = await readProjectFile('.gitignore');
