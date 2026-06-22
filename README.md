@@ -91,12 +91,21 @@ KUROCO_PRODUCTS_ID=
 KUROCO_KNIVES_ID=
 KUROCO_FORM_JP_ID=
 KUROCO_FORM_ENG_ID=
+KUROCO_HOMEPAGE_TOKEN=
+KUROCO_NEWS_TOKEN=
+KUROCO_PRODUCTS_TOKEN=
+KUROCO_KNIVES_TOKEN=
 NUXT_PUBLIC_SITE_URL=
 ```
 
 `NUXT_PUBLIC_GTM_ID` is the public Google Tag Manager container ID for Consent Mode v2.
 Set it as a build variable for environments that should emit GTM; leaving it blank omits
 the GTM script and noscript fallback from rendered pages.
+
+Kuroco static API tokens are server-only read tokens. `KUROCO_HOMEPAGE_TOKEN` is used for
+homepage, SEIBU content, and SEIBU workshop reads; `KUROCO_NEWS_TOKEN` is used for news reads;
+`KUROCO_PRODUCTS_TOKEN` is used for product reads; and `KUROCO_KNIVES_TOKEN` is used for knife
+reads. These tokens are not sent with contact or SEIBU reservation form submissions.
 
 ## Reusable Skills
 

@@ -55,7 +55,10 @@ export default defineNuxtConfig({
 		kurocoKnivesId: process.env.KUROCO_KNIVES_ID || '7',
 		kurocoFormJpId: process.env.KUROCO_FORM_JP_ID || '3',
 		kurocoFormEngId: process.env.KUROCO_FORM_ENG_ID || '1',
-		kurocoApiAccessToken: process.env.KUROCO_API_ACCESS_TOKEN || '',
+		kurocoHomepageToken: process.env.KUROCO_HOMEPAGE_TOKEN || '',
+		kurocoNewsToken: process.env.KUROCO_NEWS_TOKEN || '',
+		kurocoProductsToken: process.env.KUROCO_PRODUCTS_TOKEN || '',
+		kurocoKnivesToken: process.env.KUROCO_KNIVES_TOKEN || '',
 		kurocoSeibuContentPath: process.env.KUROCO_SEIBU_CONTENT_PATH || '/rcms-api/3/seibu-content',
 		kurocoSeibuWorkshopPath: process.env.KUROCO_SEIBU_WORKSHOP_PATH || '/rcms-api/3/seibu-workshop',
 		kurocoSeibuReservationPostPath:

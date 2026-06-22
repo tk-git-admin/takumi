@@ -6,6 +6,10 @@ node_modules
 .cache
 .output
 .env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
 dist
 .DS_Store
 .fleet
