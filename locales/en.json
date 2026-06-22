@@ -61,6 +61,13 @@
 		"copyright": "© {year} Takumi International Sdn Bhd. All rights reserved.",
 		"region": "Kuala Lumpur, Malaysia"
 	},
+	"cookieConsent": {
+		"label": "Cookie consent",
+		"title": "Cookie preferences",
+		"message": "We use analytics and advertising cookies to understand site activity and improve our services. You can accept or decline them.",
+		"accept": "Accept",
+		"decline": "Decline"
+	},
 	"topBanner": {
 		"title": "CASIO G-SHOCK WATCHES",
 		"detail1": "The trusted Malaysia marketplace to buy G-Shock from Japan",

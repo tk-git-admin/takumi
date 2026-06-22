@@ -82,6 +82,7 @@ NUXT_BASIC_AUTH_USERNAME=
 NUXT_BASIC_AUTH_PASSWORD=
 NUXT_BASIC_AUTH_ENABLED=false
 NUXT_BASIC_AUTH_PREVIEW_HOSTNAMES=
+NUXT_PUBLIC_GTM_ID=GTM-NJP9WCVD
 KUROCO_BASE_URL=
 KUROCO_HOME_ID=
 KUROCO_HOME_SLUG_ID=
@@ -92,6 +93,10 @@ KUROCO_FORM_JP_ID=
 KUROCO_FORM_ENG_ID=
 NUXT_PUBLIC_SITE_URL=
 ```
+
+`NUXT_PUBLIC_GTM_ID` is the public Google Tag Manager container ID for Consent Mode v2.
+Set it as a build variable for environments that should emit GTM; leaving it blank omits
+the GTM script and noscript fallback from rendered pages.
 
 ## Reusable Skills
 

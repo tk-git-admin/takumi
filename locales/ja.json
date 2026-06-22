@@ -61,6 +61,13 @@
 		"copyright": "© {year} Takumi International Sdn Bhd. All rights reserved.",
 		"region": "クアラルンプール, マレーシア"
 	},
+	"cookieConsent": {
+		"label": "Cookie同意",
+		"title": "Cookie設定",
+		"message": "サイトの利用状況を把握しサービス改善に役立てるため、分析および広告Cookieを使用します。許可または拒否を選択できます。",
+		"accept": "許可する",
+		"decline": "拒否する"
+	},
 	"topBanner": {
 		"title": "CASIO G-SHOCK時計",
 		"detail1": "日本からG-Shockを購入するための信頼できるマレーシアのマーケットプレイス",
