@@ -24,18 +24,19 @@ export async function useTakumiContent() {
 	const newsStore = useNews();
 	const productsStore = useProducts();
 	const knivesStore = useKnives();
+	const requestFetch = useRequestFetch();
 
 	const { data, error } = await useAsyncData('takumi-content', async () => {
 		const [homeEn, homeJa, newsEn, newsJa, productsEn, productsJa, knivesEn, knivesJa] =
 			await Promise.all([
-				$fetch<DetailsResponse>('/api/content/home', { query: contentQuery('en') }),
-				$fetch<DetailsResponse>('/api/content/home', { query: contentQuery('ja') }),
-				$fetch<ListResponse>('/api/content/news', { query: contentQuery('en') }),
-				$fetch<ListResponse>('/api/content/news', { query: contentQuery('ja') }),
-				$fetch<ListResponse>('/api/content/products', { query: contentQuery('en') }),
-				$fetch<ListResponse>('/api/content/products', { query: contentQuery('ja') }),
-				$fetch<ListResponse>('/api/content/knives', { query: contentQuery('en') }),
-				$fetch<ListResponse>('/api/content/knives', { query: contentQuery('ja') }),
+				requestFetch<DetailsResponse>('/api/content/home', { query: contentQuery('en') }),
+				requestFetch<DetailsResponse>('/api/content/home', { query: contentQuery('ja') }),
+				requestFetch<ListResponse>('/api/content/news', { query: contentQuery('en') }),
+				requestFetch<ListResponse>('/api/content/news', { query: contentQuery('ja') }),
+				requestFetch<ListResponse>('/api/content/products', { query: contentQuery('en') }),
+				requestFetch<ListResponse>('/api/content/products', { query: contentQuery('ja') }),
+				requestFetch<ListResponse>('/api/content/knives', { query: contentQuery('en') }),
+				requestFetch<ListResponse>('/api/content/knives', { query: contentQuery('ja') }),
 			]);
 
 		return {
