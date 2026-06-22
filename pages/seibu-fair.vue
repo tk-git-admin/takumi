@@ -1,7 +1,7 @@
 <template>
 	<main class="seibu-page bg-base-100">
 		<section class="py-12">
-			<div class="w-container">
+			<div class="w-container seibu-page-container">
 				<div class="grid gap-8 lg:grid-cols-2 lg:items-start">
 					<div class="flex flex-col gap-5">
 						<p class="font-bold text-primary">{{ event.host }}</p>
@@ -79,7 +79,7 @@
 		</section>
 
 		<section class="bg-neutral py-12">
-			<div class="w-container seibu-companies-container">
+			<div class="w-container seibu-page-container seibu-companies-container">
 				<div class="mb-8">
 					<h2 class="text-3xl font-bold text-primary">
 						{{ event.companiesTitle || t('seibuFair.sections.companies') }}
@@ -120,7 +120,7 @@
 		</section>
 
 		<section v-if="event.productAssets.length" class="py-12">
-			<div class="w-container">
+			<div class="w-container seibu-page-container">
 				<div class="mb-8">
 					<h2 class="text-3xl font-bold text-primary">
 						{{ event.featuredProductsTitle || t('seibuFair.sections.products') }}
@@ -144,8 +144,8 @@
 			</div>
 		</section>
 
-		<section id="registration" class="bg-neutral py-12">
-			<div class="w-container">
+		<section id="registration" class="bg-neutral py-12 seibu-registration-section">
+			<div class="w-container seibu-page-container seibu-registration-container">
 				<div class="mb-8">
 					<h2 class="text-3xl font-bold text-primary">
 						{{ event.registrationTitle || t('seibuFair.sections.registration') }}
@@ -157,7 +157,7 @@
 
 				<div
 					v-if="event.experiences.length"
-					class="tabs tabs-boxed mb-6"
+					class="tabs tabs-boxed seibu-experience-tabs mb-6"
 					role="tablist"
 					:aria-label="t('seibuFair.accessibility.experienceType')">
 					<button
@@ -177,74 +177,59 @@
 					<article
 						v-if="selectedExperience.id"
 						:key="selectedExperience.id"
-						class="card border border-base-200 bg-base-100">
-						<div class="card-body">
-							<div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-								<div>
-									<div class="flex flex-wrap items-center gap-2">
-										<h3 class="card-title">{{ selectedExperience.name }}</h3>
-									</div>
-									<p
-										v-if="selectedExperience.description"
-										class="mt-3 leading-7 text-secondary-500">
-										{{ selectedExperience.description }}
-									</p>
-								</div>
-								<span v-if="selectedExperience.time" class="badge badge-outline">
-									{{ selectedExperience.time }}
-								</span>
+						class="seibu-registration-panel border border-base-200 bg-base-100">
+						<div class="seibu-registration-panel__header">
+							<div class="seibu-registration-panel__copy">
+								<h3 class="seibu-registration-title">{{ selectedExperience.name }}</h3>
+								<p
+									v-if="selectedExperience.description"
+									class="seibu-registration-description text-secondary-500">
+									{{ selectedExperience.description }}
+								</p>
 							</div>
+							<span v-if="selectedExperience.time" class="seibu-time-chip">
+								{{ selectedExperience.time }}
+							</span>
+						</div>
 
-							<div class="mt-4 overflow-x-auto">
-								<table class="table">
-									<thead>
-										<tr>
-											<th>{{ t('seibuFair.table.session') }}</th>
-											<th>{{ t('seibuFair.table.seats') }}</th>
-											<th></th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr v-for="session in selectedExperience.sessions" :key="session.id">
-											<td>
-												<div class="font-bold">{{ session.date }}</div>
-												<div class="text-sm text-secondary-500">
-													{{ session.time || selectedExperience.time }}
-												</div>
-											</td>
-											<td>
-												<div class="flex min-w-40 flex-col gap-2">
-													<span class="text-sm text-secondary-500">
-														{{
-															t('seibuFair.table.seatsBooked', {
-																booked: bookedSeats(session.id),
-																capacity: session.capacity,
-															})
-														}}
-													</span>
-													<progress
-														class="progress progress-primary w-40"
-														:value="seatPercent(session.id)"
-														max="100"></progress>
-												</div>
-											</td>
-											<td class="text-right">
-												<button
-													type="button"
-													class="btn btn-primary btn-sm"
-													:disabled="isSessionFull(session.id)"
-													@click="openReservation(selectedExperience, session)">
-													{{
-														isSessionFull(session.id)
-															? t('seibuFair.actions.full')
-															: t('seibuFair.actions.reserve')
-													}}
-												</button>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
+						<div class="seibu-session-list" role="list">
+							<article
+								v-for="session in selectedExperience.sessions"
+								:key="session.id"
+								class="seibu-session-option"
+								role="listitem">
+								<div class="seibu-session-main">
+									<div class="seibu-session-date">{{ session.date }}</div>
+									<div class="seibu-session-time text-secondary-500">
+										{{ session.time || selectedExperience.time }}
+									</div>
+								</div>
+								<div class="seibu-session-availability">
+									<span class="text-sm text-secondary-500">
+										{{
+											t('seibuFair.table.seatsBooked', {
+												booked: bookedSeats(session.id),
+												capacity: session.capacity,
+											})
+										}}
+									</span>
+									<progress
+										class="progress progress-primary seibu-session-progress"
+										:value="seatPercent(session.id)"
+										max="100"></progress>
+								</div>
+								<button
+									type="button"
+									class="btn btn-primary btn-sm seibu-session-reserve"
+									:disabled="isSessionFull(session.id)"
+									@click="openReservation(selectedExperience, session)">
+									{{
+										isSessionFull(session.id)
+											? t('seibuFair.actions.full')
+											: t('seibuFair.actions.reserve')
+									}}
+								</button>
+							</article>
 						</div>
 					</article>
 				</Transition>
@@ -718,6 +703,22 @@ useSeoMeta({
 	height: auto;
 }
 
+.seibu-page-container {
+	width: min(calc(100% - 2rem), 1280px);
+	max-width: 1280px;
+	min-width: 0;
+}
+
+.seibu-registration-container {
+	width: min(calc(100% - 2rem), 1280px);
+	max-width: 1280px;
+	min-width: 0;
+}
+
+.seibu-registration-section {
+	scroll-margin-top: 5.5rem;
+}
+
 .seibu-stat-circle {
 	aspect-ratio: 1 / 1;
 	width: clamp(6rem, 24vw, 8.5rem);
@@ -751,9 +752,127 @@ useSeoMeta({
 	min-width: 0;
 }
 
-.seibu-companies-container {
-	width: min(calc(100% - 6rem), 1538px);
-	max-width: 1538px;
+.seibu-experience-tabs {
+	display: flex;
+	width: 100%;
+	max-width: 100%;
+	align-items: center;
+	gap: clamp(0.25rem, 0.8vw, 0.5rem);
+	overflow-x: auto;
+	overflow-y: hidden;
+	flex-wrap: nowrap;
+	scroll-padding-inline: 0.35rem;
+	scroll-snap-type: inline proximity;
+	scrollbar-gutter: stable;
+	-webkit-overflow-scrolling: touch;
+}
+
+.seibu-experience-tabs :deep(.tab) {
+	flex: 1 0 auto;
+	max-width: min(18rem, 74vw);
+	min-width: max-content;
+	overflow: hidden;
+	scroll-snap-align: start;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.seibu-registration-panel {
+	overflow: hidden;
+	padding: clamp(1.25rem, 3vw, 2rem);
+	border-radius: 0.5rem;
+	box-shadow: 0 1rem 2.25rem rgb(var(--tk-color-ink-rgb) / 5%);
+}
+
+.seibu-registration-panel__header {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: start;
+	gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+.seibu-registration-panel__copy {
+	min-width: 0;
+}
+
+.seibu-registration-title {
+	margin: 0;
+	color: var(--tk-color-sumi);
+	font-size: clamp(1.35rem, 2vw, 1.9rem);
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+.seibu-registration-description {
+	max-width: 54rem;
+	margin-top: 0.95rem;
+	font-size: clamp(1rem, 1.25vw, 1.12rem);
+	line-height: 1.75;
+}
+
+.seibu-time-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.25rem;
+	padding: 0 0.95rem;
+	border: 1px solid rgb(var(--tk-color-ink-rgb) / 18%);
+	border-radius: 9999px;
+	background: rgb(var(--tk-color-brand-brown-rgb) / 5%);
+	color: var(--tk-color-sumi);
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.seibu-session-list {
+	display: grid;
+	gap: 0.85rem;
+	margin-top: clamp(1.4rem, 2.6vw, 2rem);
+}
+
+.seibu-session-option {
+	display: grid;
+	grid-template-columns: minmax(0, 1.1fr) minmax(12rem, 0.9fr) auto;
+	align-items: center;
+	gap: clamp(0.9rem, 2vw, 1.4rem);
+	padding: clamp(1rem, 2vw, 1.25rem);
+	border: 1px solid rgb(var(--tk-color-ink-rgb) / 10%);
+	border-radius: 0.5rem;
+	background: rgb(var(--tk-color-ink-rgb) / 1.5%);
+}
+
+.seibu-session-main,
+.seibu-session-availability {
+	min-width: 0;
+}
+
+.seibu-session-date {
+	color: var(--tk-color-sumi);
+	font-weight: 800;
+	line-height: 1.35;
+}
+
+.seibu-session-time {
+	margin-top: 0.25rem;
+	font-size: 0.92rem;
+	line-height: 1.45;
+}
+
+.seibu-session-availability {
+	display: grid;
+	gap: 0.55rem;
+}
+
+.seibu-session-progress {
+	width: 100%;
+	max-width: 14rem;
+}
+
+.seibu-session-reserve {
+	justify-self: end;
+	white-space: nowrap;
 }
 
 .seibu-page :deep(.btn),
@@ -922,8 +1041,22 @@ useSeoMeta({
 }
 
 @media screen and (max-width: 767px) {
-	.seibu-companies-container {
-		width: min(calc(100% - 2rem), 480px);
+	.seibu-registration-panel__header,
+	.seibu-session-option {
+		grid-template-columns: 1fr;
+	}
+
+	.seibu-time-chip {
+		justify-self: start;
+	}
+
+	.seibu-session-progress {
+		max-width: none;
+	}
+
+	.seibu-session-reserve {
+		width: 100%;
+		justify-self: stretch;
 	}
 
 	.seibu-exhibitor-body {

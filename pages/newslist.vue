@@ -1,46 +1,20 @@
 <template>
-	<!-- News Section -->
-	<div class="py-12 bg-neutral"></div>
-	<div class="py-12 bg-neutral">
-		<h1 class="text-4xl font-bold text-center">
-			{{ $t('news.title') }}
-		</h1>
+	<section class="news-list-section bg-neutral">
+		<div class="news-list-section__inner">
+			<h1 class="news-list-section__title">
+				{{ $t('news.title') }}
+			</h1>
 
-		<div class="mt-10 flex flex-col gap-10 items-start items-center lg:justify-center md:m-16">
-			<!-- News Cards -->
-			<div class="w-container flex flex-col items-center">
-				<div
+			<div class="news-list-section__grid">
+				<NewsCard
 					v-for="(item, index) in getNewsList()"
-					class="card bg-base-100 border border-base-200 flex card w-80 xs:w-96 md:w-full my-3">
-					<!-- Card -->
-					<NuxtLink :to="localePath({ path: `../news/${item.slug}/` })" no-prefetch>
-						<div class="flex flex-col bg-base-200 rounded-box">
-							<!-- Body-->
-							<div class="flex flex-col lg:flex-row">
-								<img
-									v-if="item.thumbnail.url"
-									:src="item.thumbnail.url"
-									alt="Thumbnail"
-									class="lg:max-w-64 object-cover bg-base-100" />
-								<img
-									v-else
-									:src="'/img/takumi-ogp.png'"
-									alt="Default Image"
-									class="lg:max-w-64 object-cover bg-base-100" />
-								<div class="flex flex-col p-3">
-									<h3 class="text-primary font-medium">{{ item.news.category }}</h3>
-									<a class="link link-hover text-xl font-bold">{{ item.news.headline }}</a>
-									<span>
-										{{ item.news.intro }}
-									</span>
-								</div>
-							</div>
-						</div>
-					</NuxtLink>
-				</div>
+					:key="item.slug || index"
+					:item="item"
+					:to="localePath({ path: `../news/${item.slug}/` })"
+					variant="list" />
 			</div>
 		</div>
-	</div>
+	</section>
 </template>
 
 <script lang="ts" setup>
@@ -66,3 +40,47 @@ useSeoMeta({
 	twitterCard: t('seo.twitterCard') as 'summary' | 'summary_large_image' | 'app' | 'player',
 });
 </script>
+
+<style scoped>
+.news-list-section {
+	padding: clamp(9.5rem, 20vh, 13.5rem) 0 var(--tk-space-section);
+}
+
+.news-list-section__inner {
+	width: min(calc(100% - calc(var(--tk-space-gutter) * 2)), var(--tk-content-max));
+	margin: 0 auto;
+}
+
+.news-list-section__title {
+	margin: 0;
+	color: var(--tk-color-sumi);
+	font-size: clamp(2.35rem, 10vw, 4rem);
+	font-weight: 800;
+	line-height: 1.05;
+	text-align: center;
+}
+
+.news-list-section__grid {
+	display: grid;
+	gap: clamp(1rem, 4vw, 1.5rem);
+	margin-top: clamp(2rem, 8vw, 3.5rem);
+}
+
+@media (min-width: 768px) {
+	.news-list-section__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 1024px) {
+	.news-list-section__grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 620px) {
+	.news-list-section {
+		padding-block: clamp(9rem, 38vw, 10rem) var(--tk-space-section);
+	}
+}
+</style>

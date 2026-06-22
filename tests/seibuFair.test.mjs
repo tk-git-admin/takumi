@@ -88,7 +88,11 @@ test('SEIBU exhibitor cards use CMS logos with initials placeholders', async () 
 		true,
 	);
 	assert.equal(pageSource.includes('exhibitorTitleFallback'), true);
-	assert.equal(pageSource.includes('max-width: 1538px'), true);
+	assert.equal(
+		pageSource.includes('class="w-container seibu-page-container seibu-companies-container"'),
+		true,
+	);
+	assert.equal(pageSource.includes('1538px'), false);
 	assert.equal(pageSource.includes('min-height: 25.25rem'), true);
 	assert.equal(pageSource.includes('seibu-exhibitor-wordmark'), false);
 	assert.equal(pageSource.includes('fallbackLogoTitle'), false);
@@ -203,7 +207,8 @@ test('announcement component remains reusable and nav localizes campaign copy', 
 	);
 	assert.equal(componentSource.includes('seibuFairEvent'), false);
 	assert.equal(componentSource.includes('~/data/seibuFair'), false);
-	assert.equal(componentSource.includes('linear-gradient'), false);
+	assert.equal(componentSource.includes('announcement-bar__dot'), true);
+	assert.equal(componentSource.includes('linear-gradient'), true);
 	assert.equal(componentSource.includes('mdi:arrow-right'), false);
 	assert.equal(componentSource.includes('announcement-bar__meta'), false);
 
@@ -236,7 +241,12 @@ test('mobile nav uses hamburger menu instead of fixed bottom tabs', async () => 
 	assert.equal(navSource.includes('fixed lg:hidden bottom-0'), false);
 	assert.equal(navSource.includes('shadow-t'), false);
 	assert.equal(navSource.includes('mdi:menu'), true);
+	assert.equal(navSource.includes('mdi:close'), true);
 	assert.equal(navSource.includes('dropdown'), true);
+	assert.equal(navSource.includes('isMobileMenuOpen'), true);
+	assert.equal(navSource.includes(':aria-expanded="isMobileMenuOpen"'), true);
+	assert.equal(navSource.includes('v-show="isMobileMenuOpen"'), true);
+	assert.equal(navSource.includes('@click="closeMobileMenu"'), true);
 	assert.equal(navSource.includes("t('links.home')"), true);
 });
 
@@ -277,6 +287,65 @@ test('SEIBU event page uses existing design-system buttons and internal APIs', a
 		/function resolveExhibitorLogo\(exhibitor\)\s*{\s*return asString\(exhibitor\?\.logoSrc\);\s*}/,
 	);
 	assert.equal(nuxtConfigSource.includes('/rcms-api/1/seibu-reservations'), true);
+});
+
+test('SEIBU experience tabs stay single-row and horizontally scrollable when crowded', async () => {
+	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
+
+	assert.equal(pageSource.includes('seibu-page-container'), true);
+	assert.match(
+		pageSource,
+		/\.seibu-page-container\s*\{[\s\S]*?width:\s*min\(calc\(100% - 2rem\), 1280px\);/,
+	);
+	assert.equal(pageSource.includes('seibu-registration-container'), true);
+	assert.match(
+		pageSource,
+		/\.seibu-registration-container\s*\{[\s\S]*?width:\s*min\(calc\(100% - 2rem\), 1280px\);/,
+	);
+	assert.equal(pageSource.includes('seibu-registration-section'), true);
+	assert.match(
+		pageSource,
+		/\.seibu-registration-section\s*\{[\s\S]*?scroll-margin-top:\s*5\.5rem;/,
+	);
+	assert.equal(pageSource.includes('seibu-experience-tabs'), true);
+	assert.match(pageSource, /\.seibu-experience-tabs\s*\{[\s\S]*?overflow-x:\s*auto;/);
+	assert.match(pageSource, /\.seibu-experience-tabs\s*\{[\s\S]*?flex-wrap:\s*nowrap;/);
+	assert.match(
+		pageSource,
+		/\.seibu-experience-tabs\s*:deep\(\.tab\)\s*\{[\s\S]*?white-space:\s*nowrap;/,
+	);
+	assert.match(
+		pageSource,
+		/\.seibu-experience-tabs\s*:deep\(\.tab\)\s*\{[\s\S]*?flex:\s*1 0 auto;/,
+	);
+	assert.match(
+		pageSource,
+		/\.seibu-experience-tabs\s*:deep\(\.tab\)\s*\{[\s\S]*?scroll-snap-align:\s*start;/,
+	);
+});
+
+test('SEIBU registration session picker uses responsive option rows', async () => {
+	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
+
+	assert.equal(pageSource.includes('seibu-registration-panel'), true);
+	assert.equal(pageSource.includes('class="badge badge-outline"'), false);
+	assert.equal(pageSource.includes('seibu-time-chip'), true);
+	assert.match(pageSource, /\.seibu-time-chip\s*\{[\s\S]*?white-space:\s*nowrap;/);
+	assert.equal(pageSource.includes('seibu-session-list'), true);
+	assert.match(
+		pageSource,
+		/<article[\s\S]*v-for="session in selectedExperience\.sessions"[\s\S]*class="seibu-session-option"/,
+	);
+	assert.match(pageSource, /\.seibu-session-option\s*\{[\s\S]*?display:\s*grid;/);
+	assert.match(
+		pageSource,
+		/\.seibu-session-option\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1\.1fr\) minmax\(12rem, 0\.9fr\) auto;/,
+	);
+	assert.match(
+		pageSource,
+		/@media screen and \(max-width: 767px\)\s*\{[\s\S]*?\.seibu-session-option\s*\{[\s\S]*?grid-template-columns:\s*1fr;/,
+	);
+	assert.match(pageSource, /\.seibu-session-reserve\s*\{[\s\S]*?justify-self:\s*end;/);
 });
 
 test('SEIBU UI copy exists in English and Japanese locale files', async () => {

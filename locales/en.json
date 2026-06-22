@@ -42,9 +42,31 @@
 		}
 	},
 	"product": {
+		"bladeLength": "Blade Length",
+		"close": "Close product details",
+		"image": "Product image",
+		"images": "Product images",
 		"order": "Order",
+		"orderMessage": "Hi, I would like to order {name}",
+		"price": "Price",
 		"soldout": "Sold Out",
 		"view": "View Details"
+	},
+	"footer": {
+		"brandLabel": "Takumi International footer",
+		"kicker": "Japan / Malaysia",
+		"description": "Japanese craft, lifestyle goods, and business support connecting makers in Japan with communities in Malaysia.",
+		"navLabel": "Footer navigation",
+		"socialLabel": "Connect with Takumi",
+		"copyright": "© {year} Takumi International Sdn Bhd. All rights reserved.",
+		"region": "Kuala Lumpur, Malaysia"
+	},
+	"cookieConsent": {
+		"label": "Cookie consent",
+		"title": "Cookie preferences",
+		"message": "We use analytics and advertising cookies to understand site activity and improve our services. You can accept or decline them.",
+		"accept": "Accept",
+		"decline": "Decline"
 	},
 	"topBanner": {
 		"title": "CASIO G-SHOCK WATCHES",
@@ -60,7 +82,7 @@
 		"subtitle": "Just contact us to search for goods you want to buy in Japan"
 	},
 	"corporate": {
-		"title": "CORPORATE INFO",
+		"title": "Corporate Info",
 		"name": "Company Name",
 		"address": "Address",
 		"manager": "Managing Director",
