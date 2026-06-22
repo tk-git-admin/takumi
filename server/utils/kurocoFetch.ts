@@ -6,23 +6,12 @@ import {
 	normalizeListResponse,
 	normalizeLocale,
 } from '../shared/kurocoContent.mjs';
-
-type ContentType = 'home' | 'news' | 'products' | 'knives';
-
-function getKurocoConfig() {
-	const config = useRuntimeConfig();
-
-	return {
-		baseUrl: String(config.kurocoBaseUrl),
-		apiIds: {
-			homeId: String(config.kurocoHomeId),
-			homeSlugId: String(config.kurocoHomeSlugId),
-			newsBlogId: String(config.kurocoNewsBlogId),
-			productsId: String(config.kurocoProductsId),
-			knivesId: String(config.kurocoKnivesId),
-		},
-	};
-}
+import {
+	getKurocoApiConfig,
+	getKurocoRuntimeConfig,
+	getKurocoStaticTokenHeaders,
+	type KurocoContentType,
+} from './kurocoConfig';
 
 export function getRequestLocale(event: Parameters<typeof getQuery>[0]) {
 	try {
@@ -38,21 +27,31 @@ export function getRequestLocale(event: Parameters<typeof getQuery>[0]) {
 	}
 }
 
-async function fetchKurocoContent(event: Parameters<typeof getQuery>[0], contentType: ContentType) {
-	const url = buildKurocoContentUrl(getKurocoConfig(), contentType, getRequestLocale(event));
-	return await $fetch<Record<string, unknown>>(url);
+async function fetchKurocoContent(
+	event: Parameters<typeof getQuery>[0],
+	contentType: KurocoContentType,
+) {
+	const config = getKurocoRuntimeConfig(event);
+	const url = buildKurocoContentUrl(
+		getKurocoApiConfig(config),
+		contentType,
+		getRequestLocale(event),
+	);
+	return await $fetch<Record<string, unknown>>(url, {
+		headers: getKurocoStaticTokenHeaders(config, contentType),
+	});
 }
 
 export async function fetchKurocoDetails(
 	event: Parameters<typeof getQuery>[0],
-	contentType: ContentType,
+	contentType: KurocoContentType,
 ) {
 	return normalizeDetailsResponse(await fetchKurocoContent(event, contentType));
 }
 
 export async function fetchKurocoList(
 	event: Parameters<typeof getQuery>[0],
-	contentType: ContentType,
+	contentType: KurocoContentType,
 ) {
 	return normalizeListResponse(await fetchKurocoContent(event, contentType));
 }

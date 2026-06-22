@@ -5,23 +5,13 @@ import {
 	mergeSeibuWorkshopSource,
 	normalizeSeibuEventSource,
 } from '../shared/seibuFairContent.mjs';
+import {
+	getKurocoAcceptHeaders,
+	getKurocoRuntimeConfig,
+	getKurocoStaticTokenHeaders,
+	runtimeString,
+} from './kurocoConfig';
 import { getRequestLocale } from './kurocoFetch';
-
-function runtimeString(config: Record<string, unknown>, key: string) {
-	const value = config[key];
-	return typeof value === 'string' ? value.trim() : String(value || '').trim();
-}
-
-function getKurocoHeaders(config: Record<string, unknown>) {
-	const token = runtimeString(config, 'kurocoApiAccessToken');
-	const headers: Record<string, string> = { accept: '*/*' };
-
-	if (token) {
-		headers['X-RCMS-API-ACCESS-TOKEN'] = token;
-	}
-
-	return headers;
-}
 
 function buildKurocoUrl(
 	config: Record<string, unknown>,
@@ -49,7 +39,7 @@ async function fetchSeibuFairContent(config: Record<string, unknown>, locale: st
 	try {
 		const response = await $fetch<Record<string, unknown>>(
 			buildKurocoUrl(config, contentPath, locale),
-			{ headers: getKurocoHeaders(config) },
+			{ headers: getKurocoStaticTokenHeaders(config, 'home') },
 		);
 		return normalizeSeibuEventSource(response, locale);
 	} catch {
@@ -66,7 +56,7 @@ async function fetchSeibuFairWorkshops(config: Record<string, unknown>, locale: 
 
 	try {
 		return await $fetch<Record<string, unknown>>(buildKurocoUrl(config, workshopPath, locale), {
-			headers: getKurocoHeaders(config),
+			headers: getKurocoStaticTokenHeaders(config, 'home'),
 		});
 	} catch {
 		return null;
@@ -84,7 +74,7 @@ export async function fetchSeibuReservationCounts(config: Record<string, unknown
 		const response = await $fetch<Record<string, unknown>>(
 			buildKurocoUrl(config, listPath, locale),
 			{
-				headers: getKurocoHeaders(config),
+				headers: getKurocoAcceptHeaders(),
 			},
 		);
 		return aggregateReservationParticipants(response as any);
@@ -97,7 +87,7 @@ export async function fetchSeibuFairEvent(
 	event: Parameters<typeof getRequestLocale>[0],
 	localeOverride?: unknown,
 ) {
-	const config = useRuntimeConfig();
+	const config = getKurocoRuntimeConfig(event);
 	const locale = String(localeOverride || getRequestLocale(event))
 		.toLowerCase()
 		.startsWith('ja')
@@ -113,8 +103,11 @@ export async function fetchSeibuFairEvent(
 	return applyReservationAvailability(eventWithWorkshops, reservationCounts);
 }
 
-export async function submitSeibuReservationToKuroco(value: Record<string, unknown>) {
-	const config = useRuntimeConfig();
+export async function submitSeibuReservationToKuroco(
+	event: Parameters<typeof getRequestLocale>[0],
+	value: Record<string, unknown>,
+) {
+	const config = getKurocoRuntimeConfig(event);
 	const reservationPostPath = runtimeString(config, 'kurocoSeibuReservationPostPath');
 
 	if (!reservationPostPath) {
@@ -128,7 +121,7 @@ export async function submitSeibuReservationToKuroco(value: Record<string, unkno
 
 	return await $fetch<Record<string, unknown>>(url, {
 		method: 'POST',
-		headers: getKurocoHeaders(config),
+		headers: getKurocoAcceptHeaders(),
 		body: mapSeibuReservationPayload(value),
 	});
 }

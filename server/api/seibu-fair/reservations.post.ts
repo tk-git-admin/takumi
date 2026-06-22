@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	try {
-		const response = await submitSeibuReservationToKuroco(validation.value);
+		const response = await submitSeibuReservationToKuroco(event, validation.value);
 		const updatedEvent = applyReservationAvailability(currentEvent, {
 			[validation.value.sessionId]: validation.value.participants,
 		});
@@ -75,10 +75,7 @@ export default defineEventHandler(async (event) => {
 	} catch (error) {
 		throw createError({
 			statusCode: resolveErrorStatus(error),
-			statusMessage: resolveKurocoErrorMessage(
-				error,
-				'Failed to submit SEIBU reservation.',
-			),
+			statusMessage: resolveKurocoErrorMessage(error, 'Failed to submit SEIBU reservation.'),
 		});
 	}
 });
