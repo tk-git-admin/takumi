@@ -1,4 +1,7 @@
+import { gtmBootstrap, gtmNoscript } from './config/gtm';
+
 const isCloudflarePagesBuild = Boolean(process.env.CF_PAGES_BUILD);
+const GTM_ID = process.env.NUXT_PUBLIC_GTM_ID || '';
 const siteUrl =
 	process.env.NUXT_PUBLIC_SITE_URL || 'https://takumi-international.g.kuroco-front.app/';
 const basicAuthPreviewHostnames =
@@ -14,7 +17,26 @@ export default defineNuxtConfig({
 	compatibilityDate: '2026-06-08',
 	app: {
 		head: {
-			script: [{ type: 'text/javascript', src: 'https://code.jquery.com/jquery-3.6.1.min.js' }],
+			script: [
+				...(GTM_ID
+					? [
+							{
+								innerHTML: gtmBootstrap(GTM_ID),
+								tagPosition: 'head',
+								tagPriority: 'critical',
+							},
+						]
+					: []),
+				{ type: 'text/javascript', src: 'https://code.jquery.com/jquery-3.6.1.min.js' },
+			],
+			noscript: GTM_ID
+				? [
+						{
+							innerHTML: gtmNoscript(GTM_ID),
+							tagPosition: 'bodyOpen',
+						},
+					]
+				: [],
 		},
 	},
 	runtimeConfig: {

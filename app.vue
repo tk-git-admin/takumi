@@ -1,8 +1,8 @@
 <template>
-	<google-tag />
 	<NuxtLayout>
 		<NuxtPage />
 	</NuxtLayout>
+	<CookieConsent />
 </template>
 
 <style>
