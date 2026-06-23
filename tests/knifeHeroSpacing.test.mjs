@@ -101,9 +101,13 @@ test('knife product cards use mapped Kuroco fields with CSS-driven hover motion'
 	const pageSource = await readFile(new URL('../pages/knives.vue', import.meta.url), 'utf8');
 
 	for (const expectedSource of [
-		':src="item.image[0].url"',
+		':src="knifeCardImage(item.image[0].url).src"',
+		':srcset="knifeCardImage(item.image[0].url).srcset"',
+		':sizes="knifeCardImage(item.image[0].url).sizes"',
 		'v-if="item.image[1]?.url"',
-		':src="item.image[1].url"',
+		':src="knifeCardImage(item.image[1].url).src"',
+		':loading="knifeCardImage(item.image[1].url).loading"',
+		"getKurocoImagePreset(src, 'knifeCard')",
 		"{{ $t('product.view') }}",
 		"{{ $t('product.soldout') }}",
 		'.knife-product-card__image-layer--secondary',

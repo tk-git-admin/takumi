@@ -119,6 +119,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import { getNewsHeroPresentation } from '~/utils/newsHeroPresentation.mjs';
+import { getKurocoImagePreset } from '~/utils/kurocoImage.mjs';
 
 const { locale, t } = useI18n();
 
@@ -137,12 +138,15 @@ if (!data.value?.details) {
 }
 
 const content = data.value.details;
-const heroImageUrl = content.hero?.hero_image?.url || '';
+const heroImage = computed(() =>
+	getKurocoImagePreset(content.hero?.hero_image?.url || '', 'heroImage'),
+);
+const heroImageUrl = computed(() => heroImage.value.src);
 const newsHeroPresentation = getNewsHeroPresentation(content);
 const newsHero = computed(() => ({
 	...newsHeroPresentation,
 	imageStyle: {
-		'--page-hero-image': `url(${heroImageUrl})`,
+		'--page-hero-image': `url(${heroImageUrl.value})`,
 	},
 }));
 

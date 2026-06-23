@@ -1,7 +1,16 @@
 <template>
 	<NuxtLink :to="to" class="news-card" no-prefetch>
 		<figure class="news-card__media">
-			<img :src="thumbnailUrl" :alt="imageAlt" class="news-card__image" loading="lazy" />
+			<img
+				:src="kurocoImage.src"
+				:srcset="kurocoImage.srcset"
+				:sizes="kurocoImage.sizes"
+				:width="kurocoImage.width"
+				:height="kurocoImage.height"
+				:alt="imageAlt"
+				class="news-card__image"
+				:loading="kurocoImage.loading"
+				:decoding="kurocoImage.decoding" />
 		</figure>
 
 		<div class="news-card__body">
@@ -17,6 +26,8 @@
 </template>
 
 <script setup lang="ts">
+import { getKurocoImagePreset } from '~/utils/kurocoImage.mjs';
+
 const props = withDefaults(
 	defineProps<{
 		item: Record<string, any>;
@@ -33,7 +44,9 @@ const fallbackImage = '/img/takumi-ogp.png';
 const category = computed(() => props.item?.news?.category || '');
 const headline = computed(() => props.item?.news?.headline || '');
 const intro = computed(() => props.item?.news?.intro || '');
-const thumbnailUrl = computed(() => props.item?.thumbnail?.url || fallbackImage);
+const kurocoImage = computed(() =>
+	getKurocoImagePreset(props.item?.thumbnail?.url || fallbackImage, 'newsCard'),
+);
 const imageAlt = computed(
 	() => props.item?.thumbnail?.desc || props.item?.news?.headline || 'Takumi news',
 );

@@ -27,7 +27,16 @@
 							<span v-else>{{ item.label.label }}</span>
 						</div>
 						<div class="product__content">
-							<img class="box-image" :src="item.image.url" :alt="item.model_name" />
+							<img
+								v-if="item.image?.url"
+								class="box-image"
+								:src="productImage(item.image.url).src"
+								:srcset="productImage(item.image.url).srcset"
+								:sizes="productImage(item.image.url).sizes"
+								:width="productImage(item.image.url).width"
+								:alt="item.model_name"
+								:loading="productImage(item.image.url).loading"
+								:decoding="productImage(item.image.url).decoding" />
 							<h2>{{ item.brand_name }}</h2>
 							<h2>{{ item.model_name }}</h2>
 							<div class="product-desc">
@@ -75,6 +84,7 @@
 <script lang="ts" setup>
 import { useProducts } from '~/store/products';
 import { useI18n } from 'vue-i18n';
+import { getKurocoImagePreset } from '~/utils/kurocoImage.mjs';
 const { locale, t } = useI18n();
 
 const images = {
@@ -86,6 +96,10 @@ const images = {
 const productsList = useProducts();
 function getProductsList() {
 	return productsList.getProducts(locale.value);
+}
+
+function productImage(src: string) {
+	return getKurocoImagePreset(src, 'productCard');
 }
 
 function formatPrice(price: string | number) {

@@ -32,7 +32,15 @@
 				v-model="currentSlide">
 				<Slide v-for="(image, index) in validImages" :key="image.url">
 					<figure class="product-modal__media">
-						<img :src="image.url" :alt="getImageAlt(index)" />
+						<img
+							:src="modalImage(image.url).src"
+							:srcset="modalImage(image.url).srcset"
+							:sizes="modalImage(image.url).sizes"
+							:width="modalImage(image.url).width"
+							:height="modalImage(image.url).height"
+							:alt="getImageAlt(index)"
+							:loading="index === 0 ? 'eager' : modalImage(image.url).loading"
+							:decoding="modalImage(image.url).decoding" />
 					</figure>
 				</Slide>
 				<template #addons>
@@ -52,7 +60,15 @@
 						:class="{ 'product-modal__thumb--active': currentSlide === index }"
 						:aria-current="currentSlide === index ? 'true' : undefined"
 						@click="slideTo(index)">
-						<img :src="image.url" :alt="getImageAlt(index)" />
+						<img
+							:src="modalThumb(image.url).src"
+							:srcset="modalThumb(image.url).srcset"
+							:sizes="modalThumb(image.url).sizes"
+							:width="modalThumb(image.url).width"
+							:height="modalThumb(image.url).height"
+							:alt="getImageAlt(index)"
+							:loading="modalThumb(image.url).loading"
+							:decoding="modalThumb(image.url).decoding" />
 					</button>
 				</div>
 			</div>
@@ -120,6 +136,7 @@ import 'vue3-carousel/dist/carousel.css';
 import { Carousel, Navigation, Slide } from 'vue3-carousel';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { getKurocoImagePreset } from '~/utils/kurocoImage.mjs';
 
 const props = defineProps({
 	item: {
@@ -170,6 +187,14 @@ function getImageAlt(index) {
 	const baseAlt = productImageAlt.value || props.item?.model_name || t('product.image');
 
 	return validImages.value.length > 1 ? `${baseAlt} ${index + 1}` : baseAlt;
+}
+
+function modalImage(src) {
+	return getKurocoImagePreset(src, 'modalImage');
+}
+
+function modalThumb(src) {
+	return getKurocoImagePreset(src, 'modalThumb');
 }
 
 function slideTo(index) {
