@@ -9,9 +9,14 @@
 							<template v-if="heroLogo.src">
 								<h1 class="sr-only">{{ heroLogo.name || event.title }}</h1>
 								<img
-									:src="heroLogo.src"
+									:src="heroLogoImage.src"
+									:srcset="heroLogoImage.srcset"
+									:sizes="heroLogoImage.sizes"
+									:width="heroLogoImage.width"
 									:alt="heroLogo.name || event.title"
-									class="seibu-hero-logo" />
+									class="seibu-hero-logo"
+									:loading="heroLogoImage.loading"
+									:decoding="heroLogoImage.decoding" />
 							</template>
 							<template v-else>
 								<h1 class="text-4xl font-bold text-primary md:text-5xl">
@@ -69,9 +74,14 @@
 					<figure class="card border border-base-200 bg-base-100">
 						<div class="card-body p-3">
 							<img
-								:src="posterAsset.src"
+								:src="posterImage.src"
+								:srcset="posterImage.srcset"
+								:sizes="posterImage.sizes"
+								:width="posterImage.width"
 								:alt="posterAsset.name"
-								class="seibu-poster rounded-box" />
+								class="seibu-poster rounded-box"
+								:loading="posterImage.loading"
+								:decoding="posterImage.decoding" />
 						</div>
 					</figure>
 				</div>
@@ -95,10 +105,14 @@
 							<div class="seibu-exhibitor-logo-panel seibu-exhibitor-brand">
 								<span v-if="exhibitor.logoSrc" class="seibu-exhibitor-logo-frame">
 									<img
-										:src="exhibitor.logoSrc"
+										:src="exhibitor.kurocoImage.src"
+										:srcset="exhibitor.kurocoImage.srcset"
+										:sizes="exhibitor.kurocoImage.sizes"
+										:width="exhibitor.kurocoImage.width"
 										:alt="exhibitor.logoAlt || exhibitor.name"
 										class="seibu-exhibitor-logo"
-										loading="lazy" />
+										:loading="exhibitor.kurocoImage.loading"
+										:decoding="exhibitor.kurocoImage.decoding" />
 								</span>
 								<span v-else class="seibu-exhibitor-initials" aria-hidden="true">
 									{{ exhibitor.logoInitials }}
@@ -119,7 +133,7 @@
 			</div>
 		</section>
 
-		<section v-if="event.productAssets.length" class="py-12">
+		<section v-if="productAssets.length" class="py-12">
 			<div class="w-container seibu-page-container">
 				<div class="mb-8">
 					<h2 class="text-3xl font-bold text-primary">
@@ -129,11 +143,19 @@
 
 				<div class="seibu-product-grid">
 					<article
-						v-for="asset in event.productAssets"
+						v-for="asset in productAssets"
 						:key="asset.src || asset.name"
 						class="card border border-base-200 bg-base-100">
 						<figure v-if="asset.src" class="bg-neutral">
-							<img :src="asset.src" :alt="asset.name" class="seibu-product-image" />
+							<img
+								:src="asset.kurocoImage.src"
+								:srcset="asset.kurocoImage.srcset"
+								:sizes="asset.kurocoImage.sizes"
+								:width="asset.kurocoImage.width"
+								:alt="asset.name"
+								class="seibu-product-image"
+								:loading="asset.kurocoImage.loading"
+								:decoding="asset.kurocoImage.decoding" />
 						</figure>
 						<div class="card-body gap-2">
 							<h3 class="card-title text-base">{{ asset.name }}</h3>
@@ -374,6 +396,7 @@ import {
 	isValidRegistration,
 } from '~/utils/seibuReservation.mjs';
 import { resolveSeibuExhibitorInitials } from '~/utils/seibuExhibitorPresentation.mjs';
+import { getKurocoImagePreset } from '~/utils/kurocoImage.mjs';
 
 const DEFAULT_POSTER_ASSET = {
 	name: '',
@@ -485,9 +508,17 @@ const heroLogo = computed(() => {
 		src: asset.src || DEFAULT_HERO_LOGO.src,
 	};
 });
+const posterImage = computed(() => getKurocoImagePreset(posterAsset.value.src, 'seibuPoster'));
+const heroLogoImage = computed(() => getKurocoImagePreset(heroLogo.value.src, 'seibuLogo'));
 const heroButtonHref = computed(() => event.value.heroButton?.url || '#registration');
 const heroButtonTitle = computed(
 	() => event.value.heroButton?.title || t('seibuFair.actions.reserveSeat'),
+);
+const productAssets = computed(() =>
+	(event.value.productAssets || []).map((asset) => ({
+		...asset,
+		kurocoImage: getKurocoImagePreset(asset.src, 'seibuProduct'),
+	})),
 );
 
 const seibuStats = computed(() => [
@@ -511,6 +542,7 @@ const exhibitorsWithLogos = computed(() =>
 			...exhibitor,
 			logoSrc,
 			logoAlt: asString(exhibitor.logoName) || displayName,
+			kurocoImage: getKurocoImagePreset(logoSrc, 'seibuExhibitorLogo'),
 			logoInitials: resolveSeibuExhibitorInitials(displayName),
 			exhibitorTitleFallback: displayName,
 		};

@@ -33,16 +33,26 @@
 						<div v-if="item.image[0]?.url" class="knife-product-card__image">
 							<img
 								class="knife-product-card__image-layer knife-product-card__image-layer--primary"
-								:src="item.image[0].url"
-								loading="lazy"
+								:src="knifeCardImage(item.image[0].url).src"
+								:srcset="knifeCardImage(item.image[0].url).srcset"
+								:sizes="knifeCardImage(item.image[0].url).sizes"
+								:width="knifeCardImage(item.image[0].url).width"
+								:height="knifeCardImage(item.image[0].url).height"
+								:loading="knifeCardImage(item.image[0].url).loading"
+								:decoding="knifeCardImage(item.image[0].url).decoding"
 								:alt="`${item.brand_name} ${item.model_name} ${item.blade_length}`" />
 							<img
 								v-if="item.image[1]?.url"
 								class="knife-product-card__image-layer knife-product-card__image-layer--secondary"
-								:src="item.image[1].url"
+								:src="knifeCardImage(item.image[1].url).src"
+								:srcset="knifeCardImage(item.image[1].url).srcset"
+								:sizes="knifeCardImage(item.image[1].url).sizes"
+								:width="knifeCardImage(item.image[1].url).width"
+								:height="knifeCardImage(item.image[1].url).height"
 								alt=""
 								aria-hidden="true"
-								loading="lazy" />
+								:loading="knifeCardImage(item.image[1].url).loading"
+								:decoding="knifeCardImage(item.image[1].url).decoding" />
 							<span class="knife-product-card__image-shade" aria-hidden="true"></span>
 							<button
 								type="button"
@@ -112,6 +122,7 @@ import ProductModal from '~/components/ProductModal.vue';
 import { useKnives } from '~/store/knives';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { getKurocoImagePreset } from '~/utils/kurocoImage.mjs';
 
 const { locale, t } = useI18n();
 const isShowModal = ref(false);
@@ -132,6 +143,10 @@ const knivesList = useKnives();
 function getKnivesList() {
 	// console.log(knivesList.getList(locale.value))
 	return knivesList.getList(locale.value);
+}
+
+function knifeCardImage(src) {
+	return getKurocoImagePreset(src, 'knifeCard');
 }
 
 function formatPrice(price) {

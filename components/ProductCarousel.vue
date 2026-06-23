@@ -7,6 +7,7 @@ import '@fancyapps/ui/dist/carousel/carousel.css';
 
 import { Thumbs } from '@fancyapps/ui/dist/carousel/carousel.thumbs.esm.js';
 import '@fancyapps/ui/dist/carousel/carousel.thumbs.css';
+import { getKurocoImagePreset } from '~/utils/kurocoImage.mjs';
 
 export default {
 	props: {
@@ -86,6 +87,14 @@ export default {
 			return this.item.image.filter((image) => image && image.url);
 		},
 	},
+	methods: {
+		galleryImage(src) {
+			return getKurocoImagePreset(src, 'modalImage');
+		},
+		galleryThumb(src) {
+			return getKurocoImagePreset(src, 'modalThumb');
+		},
+	},
 	// Enable to log items data
 	// watch: {
 	//     item(itemValues) {
@@ -106,10 +115,10 @@ export default {
 				v-for="(image, index) in validImages"
 				:key="index"
 				class="f-carousel__slide"
-				:data-thumb-src="image.url"
+				:data-thumb-src="galleryThumb(image.url).src"
 				data-fancybox="gallery"
-				:data-src="image.url">
-				<img alt="" :data-lazy-src="image.url" />
+				:data-src="galleryImage(image.url).src">
+				<img alt="" :data-lazy-src="galleryImage(image.url).src" />
 			</div>
 		</div>
 	</div>

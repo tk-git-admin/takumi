@@ -1,4 +1,12 @@
 const SUPPORTED_LOCALES = new Set(['en', 'ja']);
+const KUROCO_IMAGE_HOST_SUFFIX = '.g.kuroco-img.app';
+const ARTICLE_IMAGE_PRESET = {
+	width: 1200,
+	widths: [640, 960, 1200],
+	sizes: '(min-width: 1024px) 960px, 100vw',
+	quality: 75,
+	loading: 'lazy',
+};
 const ARTICLE_HEADING_CLASS_PATTERN = /\b(?:c-heading-lv2|heading-lv3)\b/;
 const ARTICLE_HEADING_MARKER_PATTERN =
 	/^((?:(?:\s|&nbsp;|&#160;)*<(?:b|strong|span)\b[^>]*>)*(?:\s|&nbsp;|&#160;)*)[■●•・]\s*/i;
@@ -46,6 +54,102 @@ function stripArticleHeadingMarker(content) {
 	return content.replace(ARTICLE_HEADING_MARKER_PATTERN, '$1');
 }
 
+function normalizeUrlSource(src) {
+	return asString(src).replace(/&amp;/g, '&');
+}
+
+function isKurocoImageUrl(src) {
+	const source = normalizeUrlSource(src);
+	if (!source) return false;
+
+	try {
+		return new URL(source).hostname.endsWith(KUROCO_IMAGE_HOST_SUFFIX);
+	} catch {
+		return false;
+	}
+}
+
+function setImageParam(url, name, value) {
+	if (value === undefined || value === null || value === '') return;
+
+	const number = Number(value);
+	if (Number.isFinite(number) && number > 0) {
+		url.searchParams.set(name, String(Math.round(number)));
+		return;
+	}
+
+	url.searchParams.set(name, String(value));
+}
+
+function withKurocoImageParams(src, modifiers = {}) {
+	const source = normalizeUrlSource(src);
+	if (!isKurocoImageUrl(source)) return asString(src);
+
+	const url = new URL(source);
+	setImageParam(url, 'width', modifiers.width);
+	setImageParam(url, 'quality', modifiers.quality);
+
+	return url.toString();
+}
+
+function getKurocoImageSrcset(src, preset) {
+	if (!isKurocoImageUrl(src)) return '';
+
+	return preset.widths
+		.map((width) => `${withKurocoImageParams(src, { width, quality: preset.quality })} ${width}w`)
+		.join(', ');
+}
+
+function escapeHtmlAttribute(value) {
+	return String(value)
+		.replace(/&/g, '&amp;')
+		.replace(/"/g, '&quot;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+}
+
+function readImgAttribute(tag, name) {
+	const pattern = new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i');
+	const match = tag.match(pattern);
+
+	return match ? match[1] || match[2] || match[3] || '' : '';
+}
+
+function setImgAttribute(tag, name, value) {
+	if (value === undefined || value === null || value === '') return tag;
+
+	const nextAttribute = ` ${name}="${escapeHtmlAttribute(value)}"`;
+	const pattern = new RegExp(`\\s${name}\\s*=\\s*(?:"[^"]*"|'[^']*'|[^\\s>]+)`, 'i');
+
+	if (pattern.test(tag)) {
+		return tag.replace(pattern, nextAttribute);
+	}
+
+	return tag.replace(/\s*\/?>$/, (ending) => `${nextAttribute}${ending}`);
+}
+
+function optimizeKurocoHtmlImages(html, preset = ARTICLE_IMAGE_PRESET) {
+	if (typeof html !== 'string' || !html) return html;
+
+	return html.replace(/<img\b[^>]*>/gi, (tag) => {
+		const src = readImgAttribute(tag, 'src');
+		if (!isKurocoImageUrl(src)) return tag;
+
+		let nextTag = setImgAttribute(
+			tag,
+			'src',
+			withKurocoImageParams(src, { width: preset.width, quality: preset.quality }),
+		);
+		nextTag = setImgAttribute(nextTag, 'srcset', getKurocoImageSrcset(src, preset));
+		nextTag = setImgAttribute(nextTag, 'sizes', preset.sizes);
+		nextTag = setImgAttribute(nextTag, 'width', preset.width);
+		nextTag = setImgAttribute(nextTag, 'loading', preset.loading);
+		nextTag = setImgAttribute(nextTag, 'decoding', 'async');
+
+		return nextTag;
+	});
+}
+
 function normalizeArticleHeadingMarkers(article) {
 	if (typeof article !== 'string' || !article) {
 		return article;
@@ -65,7 +169,10 @@ function normalizeArticleHeadingMarkers(article) {
 
 function normalizeNewsArticle(details) {
 	const article = details?.news?.article;
-	const normalizedArticle = normalizeArticleHeadingMarkers(article);
+	const normalizedArticle = optimizeKurocoHtmlImages(
+		normalizeArticleHeadingMarkers(article),
+		ARTICLE_IMAGE_PRESET,
+	);
 
 	if (normalizedArticle === article) {
 		return details;

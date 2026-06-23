@@ -2,8 +2,10 @@ import { useHome } from '~/store/home';
 import { useKnives } from '~/store/knives';
 import { useNews } from '~/store/news';
 import { useProducts } from '~/store/products';
+import { watch } from 'vue';
 
 type LocaleCode = 'en' | 'ja';
+type KurocoContentGroup = 'home' | 'news' | 'products' | 'knives';
 
 type DetailsResponse = {
 	details: Record<string, any> | null;
@@ -13,10 +15,34 @@ type ListResponse = {
 	list: Array<Record<string, any>>;
 };
 
-const locales: LocaleCode[] = ['en', 'ja'];
-
 function contentQuery(locale: LocaleCode) {
 	return { lang: locale };
+}
+
+function normalizeLocaleCode(locale: string): LocaleCode {
+	return locale === 'ja' ? 'ja' : 'en';
+}
+
+function normalizeRoutePath(path: string) {
+	const cleanPath =
+		String(path || '/')
+			.split('#')[0]
+			.split('?')[0]
+			.replace(/^\/ja(?=\/|$)/, '') || '/';
+
+	if (cleanPath === '/') return cleanPath;
+	return cleanPath.replace(/\/$/, '');
+}
+
+export function getContentTypesForRoute(path: string): KurocoContentGroup[] {
+	const routePath = normalizeRoutePath(path);
+
+	if (routePath === '/') return ['home', 'news'];
+	if (routePath === '/newslist') return ['news'];
+	if (routePath === '/products') return ['products'];
+	if (routePath === '/knives') return ['knives'];
+
+	return [];
 }
 
 export async function useTakumiContent() {
@@ -25,27 +51,59 @@ export async function useTakumiContent() {
 	const productsStore = useProducts();
 	const knivesStore = useKnives();
 	const requestFetch = useRequestFetch();
+	const route = useRoute();
+	const { locale } = useI18n();
 
-	const { data, error } = await useAsyncData('takumi-content', async () => {
-		const [homeEn, homeJa, newsEn, newsJa, productsEn, productsJa, knivesEn, knivesJa] =
+	const { data, error } = await useAsyncData(
+		'takumi-content',
+		async () => {
+			const currentLocale = normalizeLocaleCode(locale.value);
+			const contentTypes = getContentTypesForRoute(route.path);
+			const result = {
+				locale: currentLocale,
+				home: null as Record<string, any> | null,
+				news: [] as Array<Record<string, any>>,
+				products: [] as Array<Record<string, any>>,
+				knives: [] as Array<Record<string, any>>,
+			};
+
 			await Promise.all([
-				requestFetch<DetailsResponse>('/api/content/home', { query: contentQuery('en') }),
-				requestFetch<DetailsResponse>('/api/content/home', { query: contentQuery('ja') }),
-				requestFetch<ListResponse>('/api/content/news', { query: contentQuery('en') }),
-				requestFetch<ListResponse>('/api/content/news', { query: contentQuery('ja') }),
-				requestFetch<ListResponse>('/api/content/products', { query: contentQuery('en') }),
-				requestFetch<ListResponse>('/api/content/products', { query: contentQuery('ja') }),
-				requestFetch<ListResponse>('/api/content/knives', { query: contentQuery('en') }),
-				requestFetch<ListResponse>('/api/content/knives', { query: contentQuery('ja') }),
+				contentTypes.includes('home')
+					? requestFetch<DetailsResponse>('/api/content/home', {
+							query: contentQuery(currentLocale),
+						}).then((response) => {
+							result.home = response.details || {};
+						})
+					: Promise.resolve(),
+				contentTypes.includes('news')
+					? requestFetch<ListResponse>('/api/content/news', {
+							query: contentQuery(currentLocale),
+						}).then((response) => {
+							result.news = response.list || [];
+						})
+					: Promise.resolve(),
+				contentTypes.includes('products')
+					? requestFetch<ListResponse>('/api/content/products', {
+							query: contentQuery(currentLocale),
+						}).then((response) => {
+							result.products = response.list || [];
+						})
+					: Promise.resolve(),
+				contentTypes.includes('knives')
+					? requestFetch<ListResponse>('/api/content/knives', {
+							query: contentQuery(currentLocale),
+						}).then((response) => {
+							result.knives = response.list || [];
+						})
+					: Promise.resolve(),
 			]);
 
-		return {
-			home: { en: homeEn.details || {}, ja: homeJa.details || {} },
-			news: { en: newsEn.list || [], ja: newsJa.list || [] },
-			products: { en: productsEn.list || [], ja: productsJa.list || [] },
-			knives: { en: knivesEn.list || [], ja: knivesJa.list || [] },
-		};
-	});
+			return result;
+		},
+		{
+			watch: [() => route.path, () => locale.value],
+		},
+	);
 
 	if (error.value) {
 		throw createError({
@@ -54,16 +112,26 @@ export async function useTakumiContent() {
 		});
 	}
 
-	const content = data.value;
-	for (const locale of locales) {
-		homeStore[locale] = content?.home[locale] || {};
+	function applyContent(content: typeof data.value) {
+		if (!content) return;
+
+		const contentLocale = normalizeLocaleCode(content.locale);
+		if (content.home) {
+			homeStore[contentLocale] = content.home;
+		}
+		if (content.news.length) {
+			newsStore[contentLocale === 'ja' ? 'ja_list' : 'en_list'] = content.news;
+		}
+		if (content.products.length) {
+			productsStore[contentLocale === 'ja' ? 'ja_list' : 'en_list'] = content.products;
+		}
+		if (content.knives.length) {
+			knivesStore[contentLocale === 'ja' ? 'ja_list' : 'en_list'] = content.knives;
+		}
 	}
-	newsStore.en_list = content?.news.en || [];
-	newsStore.ja_list = content?.news.ja || [];
-	productsStore.en_list = content?.products.en || [];
-	productsStore.ja_list = content?.products.ja || [];
-	knivesStore.en_list = content?.knives.en || [];
-	knivesStore.ja_list = content?.knives.ja || [];
+
+	applyContent(data.value);
+	watch(data, applyContent);
 
 	return { data, error };
 }
