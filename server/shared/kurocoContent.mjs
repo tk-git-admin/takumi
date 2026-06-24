@@ -1,5 +1,7 @@
 const SUPPORTED_LOCALES = new Set(['en', 'ja']);
 const KUROCO_IMAGE_HOST_SUFFIX = '.g.kuroco-img.app';
+const KUROCO_TOPIC_PATH_PATTERN = /^\/(?:v=[^/]+\/)?files\/topics\/[^?#]+/;
+const RELATIVE_KUROCO_URL_BASE = 'https://kuroco-image.local';
 const ARTICLE_IMAGE_PRESET = {
 	width: 1200,
 	widths: [640, 960, 1200],
@@ -58,9 +60,14 @@ function normalizeUrlSource(src) {
 	return asString(src).replace(/&amp;/g, '&');
 }
 
+function isRelativeKurocoImagePath(src) {
+	return KUROCO_TOPIC_PATH_PATTERN.test(src);
+}
+
 function isKurocoImageUrl(src) {
 	const source = normalizeUrlSource(src);
 	if (!source) return false;
+	if (isRelativeKurocoImagePath(source)) return true;
 
 	try {
 		return new URL(source).hostname.endsWith(KUROCO_IMAGE_HOST_SUFFIX);
@@ -81,15 +88,40 @@ function setImageParam(url, name, value) {
 	url.searchParams.set(name, String(value));
 }
 
+function createKurocoUrl(source) {
+	if (isRelativeKurocoImagePath(source)) {
+		return {
+			url: new URL(source, RELATIVE_KUROCO_URL_BASE),
+			isRelative: true,
+		};
+	}
+
+	try {
+		const url = new URL(source);
+		if (!url.hostname.endsWith(KUROCO_IMAGE_HOST_SUFFIX)) return null;
+
+		return { url, isRelative: false };
+	} catch {
+		return null;
+	}
+}
+
+function stringifyKurocoUrl({ url, isRelative }) {
+	if (!isRelative) return url.toString();
+
+	return `${url.pathname}${url.search}${url.hash}`;
+}
+
 function withKurocoImageParams(src, modifiers = {}) {
 	const source = normalizeUrlSource(src);
-	if (!isKurocoImageUrl(source)) return asString(src);
+	const kurocoUrl = createKurocoUrl(source);
+	if (!kurocoUrl) return asString(src);
 
-	const url = new URL(source);
+	const { url } = kurocoUrl;
 	setImageParam(url, 'width', modifiers.width);
 	setImageParam(url, 'quality', modifiers.quality);
 
-	return url.toString();
+	return stringifyKurocoUrl(kurocoUrl);
 }
 
 function getKurocoImageSrcset(src, preset) {
