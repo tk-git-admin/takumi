@@ -157,6 +157,26 @@ test('news detail article headings remove Kuroco marker characters only from hea
 	});
 });
 
+test('news detail article optimizes root-relative Kuroco CMS image paths', () => {
+	const relativeImage = '/v=1781170752/files/topics/54_ext_13_0.png';
+	const response = normalizeDetailsResponse({
+		details: {
+			news: {
+				article: `<p>Intro</p><img src="${relativeImage}" alt="CMS image">`,
+			},
+		},
+	});
+
+	assert.match(
+		response.details.news.article,
+		/src="\/v=1781170752\/files\/topics\/54_ext_13_0\.png\?width=1200&amp;quality=75"/,
+	);
+	assert.match(
+		response.details.news.article,
+		/srcset="[^"]*\/v=1781170752\/files\/topics\/54_ext_13_0\.png\?width=640&amp;quality=75 640w[^"]*width=1200&amp;quality=75 1200w"/,
+	);
+});
+
 test('news article heading styles keep nested Kuroco heading text white', async () => {
 	const pageSource = await readFile(new URL('../pages/news/[slug].vue', import.meta.url), 'utf8');
 

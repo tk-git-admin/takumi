@@ -179,17 +179,16 @@
 
 				<div
 					v-if="event.experiences.length"
-					class="tabs tabs-boxed seibu-experience-tabs mb-6"
-					role="tablist"
+					class="seibu-experience-tabs"
+					role="group"
 					:aria-label="t('seibuFair.accessibility.experienceType')">
 					<button
 						v-for="experience in event.experiences"
 						:key="experience.id"
 						type="button"
-						role="tab"
-						class="tab"
-						:class="{ 'tab-active': selectedExperienceId === experience.id }"
-						:aria-selected="selectedExperienceId === experience.id"
+						class="seibu-experience-tab"
+						:class="{ 'seibu-experience-tab--active': selectedExperienceId === experience.id }"
+						:aria-pressed="selectedExperienceId === experience.id"
 						@click="selectedExperienceId = experience.id">
 						{{ experienceTabLabel(experience) }}
 					</button>
@@ -219,38 +218,47 @@
 								v-for="session in selectedExperience.sessions"
 								:key="session.id"
 								class="seibu-session-option"
+								:class="{ 'seibu-session-option--full': isSessionFull(session.id) }"
+								:style="{ '--seibu-session-fill': `${seatPercent(session.id)}%` }"
 								role="listitem">
 								<div class="seibu-session-main">
 									<div class="seibu-session-date">{{ session.date }}</div>
-									<div class="seibu-session-time text-secondary-500">
-										{{ session.time || selectedExperience.time }}
+									<div class="seibu-session-time">
+										{{ sessionTimeLabel(session) }}
 									</div>
 								</div>
 								<div class="seibu-session-availability">
-									<span class="text-sm text-secondary-500">
-										{{
-											t('seibuFair.table.seatsBooked', {
-												booked: bookedSeats(session.id),
-												capacity: session.capacity,
-											})
-										}}
-									</span>
-									<progress
-										class="progress progress-primary seibu-session-progress"
-										:value="seatPercent(session.id)"
-										max="100"></progress>
+									<div class="seibu-session-availability__labels">
+										<span
+											class="seibu-session-status"
+											:class="{ 'seibu-session-status--full': isSessionFull(session.id) }">
+											{{ sessionSeatStatus(session) }}
+										</span>
+										<span class="seibu-session-booked">
+											{{ sessionBookedLabel(session) }}
+										</span>
+									</div>
+									<div
+										class="seibu-session-meter"
+										role="progressbar"
+										:aria-label="sessionAvailabilityLabel(session)"
+										:aria-valuemin="0"
+										:aria-valuemax="session.capacity"
+										:aria-valuenow="bookedSeats(session.id)">
+										<span class="seibu-session-meter__fill"></span>
+									</div>
 								</div>
 								<button
+									v-if="!isSessionFull(session.id)"
 									type="button"
-									class="btn btn-primary btn-sm seibu-session-reserve"
-									:disabled="isSessionFull(session.id)"
+									class="btn seibu-session-reserve"
+									:aria-label="reserveSessionLabel(session)"
 									@click="openReservation(selectedExperience, session)">
-									{{
-										isSessionFull(session.id)
-											? t('seibuFair.actions.full')
-											: t('seibuFair.actions.reserve')
-									}}
+									{{ t('seibuFair.actions.reserve') }}
 								</button>
+								<span v-else class="seibu-session-full" aria-disabled="true">
+									{{ t('seibuFair.actions.full') }}
+								</span>
 							</article>
 						</div>
 					</article>
@@ -615,6 +623,35 @@ function isSessionFull(sessionId) {
 	return remainingSeats(sessionId) === 0;
 }
 
+function sessionTimeLabel(session) {
+	return session.time || selectedExperience.value.time;
+}
+
+function sessionBookedLabel(session) {
+	return t('seibuFair.table.seatsBooked', {
+		booked: bookedSeats(session.id),
+		capacity: session.capacity,
+	});
+}
+
+function sessionSeatStatus(session) {
+	if (isSessionFull(session.id)) return t('seibuFair.actions.full');
+
+	return t('seibuFair.reservation.remainingSeats', {
+		count: remainingSeats(session.id),
+	});
+}
+
+function sessionAvailabilityLabel(session) {
+	return [sessionSeatStatus(session), sessionBookedLabel(session)].filter(Boolean).join(' ');
+}
+
+function reserveSessionLabel(session) {
+	return [t('seibuFair.actions.reserve'), session.date, sessionTimeLabel(session)]
+		.filter(Boolean)
+		.join(' ');
+}
+
 function openReservation(experience, session) {
 	selectedExperienceId.value = experience.id;
 	activeSession.value = session;
@@ -748,7 +785,14 @@ useSeoMeta({
 }
 
 .seibu-registration-section {
+	position: relative;
 	scroll-margin-top: 5.5rem;
+	background: linear-gradient(
+			135deg,
+			rgb(var(--tk-color-brand-brown-rgb) / 5%) 0 1px,
+			transparent 1px 16px
+		),
+		linear-gradient(180deg, #fbfaf7 0%, #f3f5f1 100%);
 }
 
 .seibu-stat-circle {
@@ -785,35 +829,80 @@ useSeoMeta({
 }
 
 .seibu-experience-tabs {
-	display: flex;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(8.75rem, 100%), 1fr));
 	width: 100%;
 	max-width: 100%;
-	align-items: center;
-	gap: clamp(0.25rem, 0.8vw, 0.5rem);
-	overflow-x: auto;
-	overflow-y: hidden;
-	flex-wrap: nowrap;
-	scroll-padding-inline: 0.35rem;
-	scroll-snap-type: inline proximity;
-	scrollbar-gutter: stable;
-	-webkit-overflow-scrolling: touch;
+	gap: 0.45rem;
+	margin-bottom: clamp(1rem, 2.2vw, 1.5rem);
+	padding: 0.35rem;
+	border: 1px solid rgb(var(--tk-color-ink-rgb) / 8%);
+	border-radius: 0.5rem;
+	background: rgb(var(--tk-color-white-rgb) / 74%);
+	box-shadow: inset 0 1px 0 rgb(var(--tk-color-white-rgb) / 82%);
 }
 
-.seibu-experience-tabs :deep(.tab) {
-	flex: 1 0 auto;
-	max-width: min(18rem, 74vw);
-	min-width: max-content;
-	overflow: hidden;
-	scroll-snap-align: start;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+.seibu-experience-tab {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	min-height: 2.85rem;
+	padding: 0.65rem 0.9rem;
+	border: 1px solid transparent;
+	border-radius: 0.42rem;
+	background: transparent;
+	color: var(--tk-color-ink);
+	font-weight: 800;
+	line-height: 1.25;
+	text-align: center;
+	text-wrap: balance;
+	cursor: pointer;
+	transition:
+		transform 180ms ease,
+		box-shadow 180ms ease,
+		background-color 180ms ease,
+		border-color 180ms ease,
+		color 180ms ease;
+}
+
+.seibu-experience-tab--active {
+	border-color: rgb(var(--tk-color-brand-brown-rgb) / 86%);
+	background: var(--tk-color-brand-brown);
+	color: var(--tk-color-white);
+	box-shadow: 0 0.7rem 1.25rem rgb(var(--tk-color-brand-brown-rgb) / 18%);
+}
+
+.seibu-experience-tab:focus-visible,
+.seibu-session-reserve:focus-visible {
+	outline: 3px solid rgb(var(--tk-color-event-gold-rgb) / 72%);
+	outline-offset: 3px;
+}
+
+@media (hover: hover) {
+	.seibu-experience-tab:hover {
+		border-color: rgb(var(--tk-color-brand-brown-rgb) / 28%);
+		background: rgb(var(--tk-color-brand-brown-rgb) / 6%);
+		transform: translateY(-1px);
+	}
+
+	.seibu-experience-tab--active:hover {
+		background: var(--tk-color-brand-brown);
+		color: var(--tk-color-white);
+	}
 }
 
 .seibu-registration-panel {
 	overflow: hidden;
 	padding: clamp(1.25rem, 3vw, 2rem);
 	border-radius: 0.5rem;
-	box-shadow: 0 1rem 2.25rem rgb(var(--tk-color-ink-rgb) / 5%);
+	background: linear-gradient(
+			180deg,
+			rgb(var(--tk-color-white-rgb) / 96%),
+			rgb(var(--tk-color-white-rgb) / 91%)
+		),
+		var(--tk-color-white);
+	box-shadow: 0 1.25rem 3rem rgb(var(--tk-color-ink-rgb) / 7%);
 }
 
 .seibu-registration-panel__header {
@@ -860,19 +949,51 @@ useSeoMeta({
 
 .seibu-session-list {
 	display: grid;
-	gap: 0.85rem;
+	gap: clamp(0.75rem, 1.6vw, 1rem);
 	margin-top: clamp(1.4rem, 2.6vw, 2rem);
 }
 
 .seibu-session-option {
+	--seibu-session-accent: var(--tk-color-brand-brown);
+	position: relative;
 	display: grid;
-	grid-template-columns: minmax(0, 1.1fr) minmax(12rem, 0.9fr) auto;
+	grid-template-columns: minmax(9rem, 0.78fr) minmax(13rem, 1fr) auto;
 	align-items: center;
-	gap: clamp(0.9rem, 2vw, 1.4rem);
-	padding: clamp(1rem, 2vw, 1.25rem);
+	gap: clamp(1rem, 2.2vw, 1.5rem);
+	padding: clamp(1rem, 2vw, 1.2rem) clamp(1rem, 2.2vw, 1.35rem);
 	border: 1px solid rgb(var(--tk-color-ink-rgb) / 10%);
 	border-radius: 0.5rem;
-	background: rgb(var(--tk-color-ink-rgb) / 1.5%);
+	background: linear-gradient(90deg, rgb(var(--tk-color-brand-brown-rgb) / 4%), transparent 44%),
+		rgb(var(--tk-color-white-rgb) / 86%);
+	box-shadow: 0 0.55rem 1.3rem rgb(var(--tk-color-ink-rgb) / 4%);
+	transition:
+		transform 180ms ease,
+		box-shadow 180ms ease,
+		border-color 180ms ease,
+		background-color 180ms ease;
+}
+
+.seibu-session-option::before {
+	position: absolute;
+	inset-block: 0.85rem;
+	inset-inline-start: 0;
+	width: 0.2rem;
+	border-radius: 999px;
+	background: var(--seibu-session-accent);
+	content: '';
+}
+
+.seibu-session-option--full {
+	--seibu-session-accent: var(--tk-color-muted);
+	background: rgb(var(--tk-color-ink-rgb) / 2.5%);
+}
+
+@media (hover: hover) {
+	.seibu-session-option:hover {
+		border-color: rgb(var(--tk-color-brand-brown-rgb) / 24%);
+		box-shadow: 0 1rem 2rem rgb(var(--tk-color-ink-rgb) / 7%);
+		transform: translateY(-1px);
+	}
 }
 
 .seibu-session-main,
@@ -888,27 +1009,109 @@ useSeoMeta({
 
 .seibu-session-time {
 	margin-top: 0.25rem;
-	font-size: 0.92rem;
+	color: var(--tk-color-muted);
+	font-size: 0.95rem;
+	font-weight: 600;
 	line-height: 1.45;
 }
 
 .seibu-session-availability {
 	display: grid;
-	gap: 0.55rem;
+	gap: 0.65rem;
 }
 
-.seibu-session-progress {
+.seibu-session-availability__labels {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.seibu-session-status {
+	display: inline-flex;
+	align-items: center;
+	min-height: 1.65rem;
+	padding: 0.2rem 0.6rem;
+	border: 1px solid rgb(var(--tk-color-brand-brown-rgb) / 18%);
+	border-radius: 999px;
+	background: rgb(var(--tk-color-brand-brown-rgb) / 8%);
+	color: var(--tk-color-brand-brown);
+	font-size: 0.78rem;
+	font-weight: 900;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.seibu-session-status--full {
+	border-color: rgb(var(--tk-color-ink-rgb) / 16%);
+	background: var(--tk-color-sumi);
+	color: var(--tk-color-white);
+}
+
+.seibu-session-booked {
+	color: var(--tk-color-ink);
+	font-size: 0.9rem;
+	font-weight: 700;
+	line-height: 1.3;
+	text-align: end;
+}
+
+.seibu-session-meter {
+	position: relative;
+	overflow: hidden;
 	width: 100%;
-	max-width: 14rem;
+	height: 0.65rem;
+	border-radius: 999px;
+	background: rgb(var(--tk-color-ink-rgb) / 14%);
+}
+
+.seibu-session-meter__fill {
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: var(--seibu-session-fill, 0%);
+	border-radius: inherit;
+	background: var(--seibu-session-accent);
+	transition: width 260ms ease;
 }
 
 .seibu-session-reserve {
+	min-height: 2.75rem;
+	min-width: 7.1rem;
+	border: 1px solid rgb(var(--tk-color-brand-brown-rgb) / 86%);
+	border-radius: 0.42rem;
+	background: var(--tk-color-brand-brown);
+	color: var(--tk-color-white);
+	font-weight: 900;
 	justify-self: end;
+	white-space: nowrap;
+	box-shadow: 0 0.65rem 1.25rem rgb(var(--tk-color-brand-brown-rgb) / 18%);
+}
+
+.seibu-session-reserve:hover {
+	border-color: var(--tk-color-sumi);
+	background: var(--tk-color-sumi);
+	color: var(--tk-color-white);
+}
+
+.seibu-session-full {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.75rem;
+	min-width: 7.1rem;
+	padding: 0 1rem;
+	border: 1px solid rgb(var(--tk-color-ink-rgb) / 18%);
+	border-radius: 0.42rem;
+	background: var(--tk-color-sumi);
+	color: var(--tk-color-white);
+	font-weight: 900;
+	justify-self: end;
+	line-height: 1;
 	white-space: nowrap;
 }
 
 .seibu-page :deep(.btn),
-.seibu-page :deep(.tab),
 .seibu-page :deep(.card) {
 	transition:
 		transform 180ms ease,
@@ -918,8 +1121,7 @@ useSeoMeta({
 		opacity 180ms ease;
 }
 
-.seibu-page :deep(.btn:hover:not(:disabled)),
-.seibu-page :deep(.tab:hover) {
+.seibu-page :deep(.btn:hover:not(:disabled)) {
 	transform: translateY(-1px);
 }
 
@@ -1082,11 +1284,8 @@ useSeoMeta({
 		justify-self: start;
 	}
 
-	.seibu-session-progress {
-		max-width: none;
-	}
-
-	.seibu-session-reserve {
+	.seibu-session-reserve,
+	.seibu-session-full {
 		width: 100%;
 		justify-self: stretch;
 	}
@@ -1101,10 +1300,24 @@ useSeoMeta({
 	}
 }
 
+@media screen and (max-width: 420px) {
+	.seibu-session-availability__labels {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 0.45rem;
+	}
+
+	.seibu-session-booked {
+		text-align: start;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.seibu-page :deep(.btn),
-	.seibu-page :deep(.tab),
 	.seibu-page :deep(.card),
+	.seibu-experience-tab,
+	.seibu-session-option,
+	.seibu-session-meter__fill,
 	.seibu-fade-enter-active,
 	.seibu-fade-leave-active,
 	.seibu-modal-enter-active,
@@ -1115,7 +1328,8 @@ useSeoMeta({
 	}
 
 	.seibu-page :deep(.btn:hover:not(:disabled)),
-	.seibu-page :deep(.tab:hover),
+	.seibu-experience-tab:hover,
+	.seibu-session-option:hover,
 	.seibu-fade-enter-from,
 	.seibu-fade-leave-to,
 	.seibu-modal-enter-from :deep(.modal-box),

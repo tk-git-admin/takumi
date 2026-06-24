@@ -10,6 +10,7 @@ import {
 } from '../utils/kurocoImage.mjs';
 
 const kurocoImageUrl = 'https://takumi-international.g.kuroco-img.app/files/topics/54_ext_3_0.png';
+const relativeKurocoImageUrl = '/v=1781170752/files/topics/54_ext_13_0.png';
 
 test('Kuroco image helper adds width and quality while preserving existing parameters', () => {
 	assert.equal(
@@ -19,6 +20,18 @@ test('Kuroco image helper adds width and quality while preserving existing param
 		}),
 		`${kurocoImageUrl}?v=1781486915&width=640&quality=75`,
 	);
+});
+
+test('Kuroco image helper optimizes root-relative Kuroco topic paths', () => {
+	assert.equal(
+		withKurocoImageParams(relativeKurocoImageUrl, { width: 640, quality: 75 }),
+		`${relativeKurocoImageUrl}?width=640&quality=75`,
+	);
+
+	const image = getKurocoImagePreset(relativeKurocoImageUrl, 'newsCard');
+
+	assert.equal(image.src, `${relativeKurocoImageUrl}?width=640&quality=75`);
+	assert.match(image.srcset, /\/v=1781170752\/files\/topics\/54_ext_13_0\.png\?width=320&quality=75 320w/);
 });
 
 test('Kuroco image helper leaves non-Kuroco, empty, and relative URLs unchanged', () => {

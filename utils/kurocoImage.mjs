@@ -1,4 +1,6 @@
 const KUROCO_IMAGE_HOST_SUFFIX = '.g.kuroco-img.app';
+const KUROCO_TOPIC_PATH_PATTERN = /^\/(?:v=[^/]+\/)?files\/topics\/[^?#]+/;
+const RELATIVE_KUROCO_URL_BASE = 'https://kuroco-image.local';
 const DEFAULT_QUALITY = 75;
 
 export const KUROCO_IMAGE_PRESETS = {
@@ -101,9 +103,14 @@ function normalizeUrlSource(src) {
 	return asString(src).replace(/&amp;/g, '&');
 }
 
+function isRelativeKurocoImagePath(src) {
+	return KUROCO_TOPIC_PATH_PATTERN.test(src);
+}
+
 export function isKurocoImageUrl(src) {
 	const source = normalizeUrlSource(src);
 	if (!source) return false;
+	if (isRelativeKurocoImagePath(source)) return true;
 
 	try {
 		const url = new URL(source);
@@ -125,16 +132,41 @@ function setParam(url, name, value) {
 	url.searchParams.set(name, String(value));
 }
 
+function createKurocoUrl(source) {
+	if (isRelativeKurocoImagePath(source)) {
+		return {
+			url: new URL(source, RELATIVE_KUROCO_URL_BASE),
+			isRelative: true,
+		};
+	}
+
+	try {
+		const url = new URL(source);
+		if (!url.hostname.endsWith(KUROCO_IMAGE_HOST_SUFFIX)) return null;
+
+		return { url, isRelative: false };
+	} catch {
+		return null;
+	}
+}
+
+function stringifyKurocoUrl({ url, isRelative }) {
+	if (!isRelative) return url.toString();
+
+	return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export function withKurocoImageParams(src, modifiers = {}) {
 	const source = normalizeUrlSource(src);
-	if (!isKurocoImageUrl(source)) return asString(src);
+	const kurocoUrl = createKurocoUrl(source);
+	if (!kurocoUrl) return asString(src);
 
-	const url = new URL(source);
+	const { url } = kurocoUrl;
 	setParam(url, 'width', modifiers.width);
 	setParam(url, 'height', modifiers.height);
 	setParam(url, 'quality', modifiers.quality);
 
-	return url.toString();
+	return stringifyKurocoUrl(kurocoUrl);
 }
 
 function uniqueWidths(widths = []) {
