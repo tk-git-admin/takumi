@@ -261,9 +261,9 @@ test('SEIBU event page uses existing design-system buttons and internal APIs', a
 	assert.equal(pageSource.includes('seibu-hero-logo'), true);
 	assert.equal(pageSource.includes('@click.prevent="scrollToRegistration"'), true);
 	assert.equal(pageSource.includes('scrollIntoView'), true);
-	assert.equal(pageSource.includes('class="tabs tabs-boxed'), true);
-	assert.equal(pageSource.includes('role="tablist"'), true);
-	assert.equal(pageSource.includes('tab-active'), true);
+	assert.equal(pageSource.includes('class="seibu-experience-tabs"'), true);
+	assert.equal(pageSource.includes('role="group"'), true);
+	assert.equal(pageSource.includes(':aria-pressed="selectedExperienceId === experience.id"'), true);
 	assert.equal(pageSource.includes('selectedExperience.label'), false);
 	assert.equal(pageSource.includes("t('seibuFair.table.seatsBooked'"), true);
 	assert.equal(pageSource.includes('bookedSeats(session.id)'), true);
@@ -289,7 +289,7 @@ test('SEIBU event page uses existing design-system buttons and internal APIs', a
 	assert.equal(nuxtConfigSource.includes('/rcms-api/1/seibu-reservations'), true);
 });
 
-test('SEIBU experience tabs stay single-row and horizontally scrollable when crowded', async () => {
+test('SEIBU experience tabs wrap into a responsive segmented control', async () => {
 	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
 
 	assert.equal(pageSource.includes('seibu-page-container'), true);
@@ -308,19 +308,18 @@ test('SEIBU experience tabs stay single-row and horizontally scrollable when cro
 		/\.seibu-registration-section\s*\{[\s\S]*?scroll-margin-top:\s*5\.5rem;/,
 	);
 	assert.equal(pageSource.includes('seibu-experience-tabs'), true);
-	assert.match(pageSource, /\.seibu-experience-tabs\s*\{[\s\S]*?overflow-x:\s*auto;/);
-	assert.match(pageSource, /\.seibu-experience-tabs\s*\{[\s\S]*?flex-wrap:\s*nowrap;/);
+	assert.match(pageSource, /\.seibu-experience-tabs\s*\{[\s\S]*?display:\s*grid;/);
 	assert.match(
 		pageSource,
-		/\.seibu-experience-tabs\s*:deep\(\.tab\)\s*\{[\s\S]*?white-space:\s*nowrap;/,
+		/\.seibu-experience-tabs\s*\{[\s\S]*?grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(8\.75rem, 100%\), 1fr\)\);/,
 	);
+	assert.equal(pageSource.includes('overflow-x: auto'), false);
+	assert.equal(pageSource.includes('flex-wrap: nowrap'), false);
+	assert.equal(pageSource.includes('seibu-experience-tab--active'), true);
+	assert.match(pageSource, /\.seibu-experience-tab\s*\{[\s\S]*?min-height:\s*2\.85rem;/);
 	assert.match(
 		pageSource,
-		/\.seibu-experience-tabs\s*:deep\(\.tab\)\s*\{[\s\S]*?flex:\s*1 0 auto;/,
-	);
-	assert.match(
-		pageSource,
-		/\.seibu-experience-tabs\s*:deep\(\.tab\)\s*\{[\s\S]*?scroll-snap-align:\s*start;/,
+		/\.seibu-experience-tab:focus-visible,\s*\.seibu-session-reserve:focus-visible\s*\{[\s\S]*?outline:/,
 	);
 });
 
@@ -339,12 +338,16 @@ test('SEIBU registration session picker uses responsive option rows', async () =
 	assert.match(pageSource, /\.seibu-session-option\s*\{[\s\S]*?display:\s*grid;/);
 	assert.match(
 		pageSource,
-		/\.seibu-session-option\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1\.1fr\) minmax\(12rem, 0\.9fr\) auto;/,
+		/\.seibu-session-option\s*\{[\s\S]*?grid-template-columns:\s*minmax\(9rem, 0\.78fr\) minmax\(13rem, 1fr\) auto;/,
 	);
 	assert.match(
 		pageSource,
 		/@media screen and \(max-width: 767px\)\s*\{[\s\S]*?\.seibu-session-option\s*\{[\s\S]*?grid-template-columns:\s*1fr;/,
 	);
+	assert.equal(pageSource.includes('role="progressbar"'), true);
+	assert.equal(pageSource.includes('seibu-session-meter__fill'), true);
+	assert.equal(pageSource.includes('seibu-session-full'), true);
+	assert.equal(pageSource.includes('seibu-session-status--full'), true);
 	assert.match(pageSource, /\.seibu-session-reserve\s*\{[\s\S]*?justify-self:\s*end;/);
 });
 
