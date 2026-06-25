@@ -48,7 +48,9 @@ function resolveKurocoErrorMessage(error: unknown, fallback: string) {
 
 export default defineEventHandler(async (event) => {
 	const body = await readBody(event);
-	const currentEvent = await fetchSeibuFairEvent(event, body.locale);
+	const currentEvent = await fetchSeibuFairEvent(event, body.locale, {
+		reservationCounts: 'fresh',
+	});
 	const validation = validateSeibuReservationPayload(body, currentEvent);
 
 	if (!validation.valid || !validation.value) {

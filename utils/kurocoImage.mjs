@@ -61,6 +61,7 @@ export const KUROCO_IMAGE_PRESETS = {
 		width: 1200,
 		widths: [640, 960, 1200],
 		sizes: '(min-width: 1024px) 50vw, 100vw',
+		format: 'jpg',
 		quality: DEFAULT_QUALITY,
 		loading: 'eager',
 	},
@@ -82,6 +83,7 @@ export const KUROCO_IMAGE_PRESETS = {
 		width: 640,
 		widths: [320, 480, 640, 800],
 		sizes: '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw',
+		format: 'jpg',
 		quality: DEFAULT_QUALITY,
 		loading: 'lazy',
 	},
@@ -164,6 +166,7 @@ export function withKurocoImageParams(src, modifiers = {}) {
 	const { url } = kurocoUrl;
 	setParam(url, 'width', modifiers.width);
 	setParam(url, 'height', modifiers.height);
+	setParam(url, 'format', modifiers.format);
 	setParam(url, 'quality', modifiers.quality);
 
 	return stringifyKurocoUrl(kurocoUrl);
@@ -185,7 +188,10 @@ export function getKurocoImageSrcset(src, preset = {}) {
 	const quality = config.quality ?? DEFAULT_QUALITY;
 
 	return widths
-		.map((width) => `${withKurocoImageParams(source, { width, quality })} ${width}w`)
+		.map(
+			(width) =>
+				`${withKurocoImageParams(source, { width, format: config.format, quality })} ${width}w`,
+		)
 		.join(', ');
 }
 
@@ -198,6 +204,7 @@ export function getKurocoImagePreset(src, preset = {}) {
 		src: withKurocoImageParams(source, {
 			width: config.width,
 			height: config.heightParam,
+			format: config.format,
 			quality,
 		}),
 		srcset: getKurocoImageSrcset(source, config),

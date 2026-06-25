@@ -13,6 +13,8 @@ import {
 } from './kurocoConfig';
 import { getRequestLocale } from './kurocoFetch';
 
+type SeibuReservationCountMode = 'cached' | 'fresh';
+
 function buildKurocoUrl(
 	config: Record<string, unknown>,
 	path: string,
@@ -83,9 +85,29 @@ export async function fetchSeibuReservationCounts(config: Record<string, unknown
 	}
 }
 
+export async function fetchFreshSeibuReservationCounts(
+	config: Record<string, unknown>,
+	locale = 'en',
+) {
+	return fetchSeibuReservationCounts(config, locale);
+}
+
+const fetchCachedSeibuReservationCounts = defineCachedFunction(
+	async (event: Parameters<typeof getRequestLocale>[0], locale = 'en') => {
+		const config = getKurocoRuntimeConfig(event);
+		return fetchSeibuReservationCounts(config, locale);
+	},
+	{
+		maxAge: 30,
+		name: 'seibuReservationCounts',
+		getKey: (_event: Parameters<typeof getRequestLocale>[0], locale = 'en') => locale,
+	},
+);
+
 export async function fetchSeibuFairEvent(
 	event: Parameters<typeof getRequestLocale>[0],
 	localeOverride?: unknown,
+	options: { reservationCounts?: SeibuReservationCountMode } = {},
 ) {
 	const config = getKurocoRuntimeConfig(event);
 	const locale = String(localeOverride || getRequestLocale(event))
@@ -93,10 +115,14 @@ export async function fetchSeibuFairEvent(
 		.startsWith('ja')
 		? 'ja'
 		: 'en';
+	const reservationCountPromise =
+		options.reservationCounts === 'fresh'
+			? fetchFreshSeibuReservationCounts(config, locale)
+			: fetchCachedSeibuReservationCounts(event, locale);
 	const [content, workshops, reservationCounts] = await Promise.all([
 		fetchSeibuFairContent(config, locale),
 		fetchSeibuFairWorkshops(config, locale),
-		fetchSeibuReservationCounts(config, locale),
+		reservationCountPromise,
 	]);
 	const eventWithWorkshops = mergeSeibuWorkshopSource(content, workshops, locale);
 

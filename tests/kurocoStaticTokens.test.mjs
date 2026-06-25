@@ -87,6 +87,22 @@ test('Kuroco read requests use grouped static tokens and form submissions do not
 	);
 });
 
+test('SEIBU reservation display counts use short server-side cache without caching submissions', async () => {
+	const seibuFetch = await readProjectFile('server/utils/seibuFairFetch.ts');
+	const reservationRoute = await readProjectFile('server/api/seibu-fair/reservations.post.ts');
+
+	assert.doesNotMatch(seibuFetch, /from\s+'nitro\/cache'/);
+	assert.match(seibuFetch, /const\s+fetchCachedSeibuReservationCounts\s*=\s*defineCachedFunction/);
+	assert.match(seibuFetch, /maxAge:\s*30/);
+	assert.match(seibuFetch, /name:\s*'seibuReservationCounts'/);
+	assert.match(seibuFetch, /getKey:\s*\([^)]*locale[^)]*\)\s*=>\s*locale/);
+	assert.match(seibuFetch, /export async function fetchFreshSeibuReservationCounts/);
+	assert.match(
+		reservationRoute,
+		/fetchSeibuFairEvent\(event,\s*body\.locale,\s*\{[\s\S]*reservationCounts:\s*'fresh'[\s\S]*\}\)/,
+	);
+});
+
 test('homepage SSR content loader preserves request context for internal Kuroco routes', async () => {
 	const composable = await readProjectFile('composables/useTakumiContent.ts');
 

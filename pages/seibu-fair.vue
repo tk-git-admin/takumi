@@ -414,6 +414,7 @@ const DEFAULT_HERO_LOGO = {
 	name: '',
 	src: '',
 };
+const SEIBU_SOCIAL_IMAGE = '/img/seibu-fair/seibu-social-preview.jpg';
 const EMPTY_SEIBU_EVENT = {
 	route: '/seibu-fair',
 	title: '',
@@ -750,8 +751,11 @@ useSeoMeta({
 	ogTitle: () => `${event.value.title} — ${event.value.subtitle}`,
 	description: () => t('seibuFair.seo.description', { host: event.value.host }),
 	ogDescription: () => t('seibuFair.seo.description', { host: event.value.host }),
-	ogImage: () => posterAsset.value.src,
+	ogImage: SEIBU_SOCIAL_IMAGE,
+	ogImageWidth: '1200',
+	ogImageHeight: '630',
 	twitterCard: 'summary_large_image',
+	twitterImage: SEIBU_SOCIAL_IMAGE,
 });
 </script>
 

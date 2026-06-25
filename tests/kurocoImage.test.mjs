@@ -22,6 +22,23 @@ test('Kuroco image helper adds width and quality while preserving existing param
 	);
 });
 
+test('Kuroco image helper can request a compressed output format for raster CMS images', () => {
+	assert.equal(
+		withKurocoImageParams(relativeKurocoImageUrl, {
+			width: 640,
+			format: 'jpg',
+			quality: 75,
+		}),
+		`${relativeKurocoImageUrl}?width=640&format=jpg&quality=75`,
+	);
+
+	const poster = getKurocoImagePreset(relativeKurocoImageUrl, 'seibuPoster');
+
+	assert.equal(poster.src, `${relativeKurocoImageUrl}?width=1200&format=jpg&quality=75`);
+	assert.match(poster.srcset, /width=640&format=jpg&quality=75 640w/);
+	assert.match(poster.srcset, /width=1200&format=jpg&quality=75 1200w/);
+});
+
 test('Kuroco image helper optimizes root-relative Kuroco topic paths', () => {
 	assert.equal(
 		withKurocoImageParams(relativeKurocoImageUrl, { width: 640, quality: 75 }),
@@ -31,7 +48,10 @@ test('Kuroco image helper optimizes root-relative Kuroco topic paths', () => {
 	const image = getKurocoImagePreset(relativeKurocoImageUrl, 'newsCard');
 
 	assert.equal(image.src, `${relativeKurocoImageUrl}?width=640&quality=75`);
-	assert.match(image.srcset, /\/v=1781170752\/files\/topics\/54_ext_13_0\.png\?width=320&quality=75 320w/);
+	assert.match(
+		image.srcset,
+		/\/v=1781170752\/files\/topics\/54_ext_13_0\.png\?width=320&quality=75 320w/,
+	);
 });
 
 test('Kuroco image helper leaves non-Kuroco, empty, and relative URLs unchanged', () => {
