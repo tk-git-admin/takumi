@@ -68,6 +68,17 @@ test('SEIBU fair product assets are available in the public image folder', async
 	}
 });
 
+test('SEIBU fair social preview uses a dedicated lightweight image instead of the CMS poster', async () => {
+	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
+	const socialImage = '/img/seibu-fair/seibu-social-preview.jpg';
+
+	await access(new URL(`../public${socialImage}`, import.meta.url));
+	assert.equal(pageSource.includes(`const SEIBU_SOCIAL_IMAGE = '${socialImage}'`), true);
+	assert.equal(pageSource.includes('ogImage: () => posterAsset.value.src'), false);
+	assert.equal(pageSource.includes('ogImage: SEIBU_SOCIAL_IMAGE'), true);
+	assert.equal(pageSource.includes('twitterImage: SEIBU_SOCIAL_IMAGE'), true);
+});
+
 test('SEIBU exhibitor cards use CMS logos with initials placeholders', async () => {
 	const pageSource = await readFile(new URL('../pages/seibu-fair.vue', import.meta.url), 'utf8');
 
@@ -449,7 +460,10 @@ test('SEIBU fair uses internal Nuxt API routes for Kuroco content and reservatio
 	assert.match(reservationRoute, /validateSeibuReservationPayload/);
 	assert.match(reservationRoute, /submitSeibuReservationToKuroco/);
 	assert.match(reservationRoute, /readBody\(event\)/);
-	assert.match(reservationRoute, /fetchSeibuFairEvent\(event, body\.locale\)/);
+	assert.match(
+		reservationRoute,
+		/fetchSeibuFairEvent\(event,\s*body\.locale,\s*\{[\s\S]*reservationCounts:\s*'fresh'[\s\S]*\}\)/,
+	);
 	assert.match(fetchUtility, /mergeSeibuWorkshopSource/);
 	assert.match(fetchUtility, /kurocoSeibuWorkshopPath/);
 	assert.match(fetchUtility, /mapSeibuReservationPayload/);
