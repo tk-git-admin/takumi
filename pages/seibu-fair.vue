@@ -215,8 +215,9 @@
 
 						<div class="seibu-session-list" role="list">
 							<article
-								v-for="session in selectedExperience.sessions"
+								v-for="session in orderedSessions.upcoming"
 								:key="session.id"
+								:ref="el => setSessionRef(el, session.id)"
 								class="seibu-session-option"
 								:class="{ 'seibu-session-option--full': isSessionFull(session.id) }"
 								:style="{ '--seibu-session-fill': `${seatPercent(session.id)}%` }"
@@ -258,6 +259,49 @@
 								</button>
 								<span v-else class="seibu-session-full" aria-disabled="true">
 									{{ t('seibuFair.actions.full') }}
+								</span>
+							</article>
+
+							<div
+								v-if="orderedSessions.past.length"
+								class="seibu-past-divider"
+								role="separator">
+								<span>{{ t('seibuFair.sections.pastSessions') }}</span>
+							</div>
+
+							<article
+								v-for="session in orderedSessions.past"
+								:key="session.id"
+								class="seibu-session-option seibu-session-option--past"
+								:style="{ '--seibu-session-fill': `${seatPercent(session.id)}%` }"
+								role="listitem">
+								<div class="seibu-session-main">
+									<div class="seibu-session-date">{{ session.date }}</div>
+									<div class="seibu-session-time">
+										{{ sessionTimeLabel(session) }}
+									</div>
+								</div>
+								<div class="seibu-session-availability">
+									<div class="seibu-session-availability__labels">
+										<span class="seibu-session-status">
+											{{ sessionSeatStatus(session) }}
+										</span>
+										<span class="seibu-session-booked">
+											{{ sessionBookedLabel(session) }}
+										</span>
+									</div>
+									<div
+										class="seibu-session-meter"
+										role="progressbar"
+										:aria-label="sessionAvailabilityLabel(session)"
+										:aria-valuemin="0"
+										:aria-valuemax="session.capacity"
+										:aria-valuenow="bookedSeats(session.id)">
+										<span class="seibu-session-meter__fill"></span>
+									</div>
+								</div>
+								<span class="seibu-session-past" aria-disabled="true">
+									{{ t('seibuFair.actions.past') }}
 								</span>
 							</article>
 						</div>
@@ -374,12 +418,25 @@
 
 						<p v-if="formError" class="text-sm font-bold text-primary">{{ formError }}</p>
 
-						<button type="submit" class="btn btn-primary w-full" :disabled="reservationSubmitting">
-							<Icon name="mdi:send" />
+						<button
+							type="submit"
+							class="btn w-full"
+							:class="{
+								'btn-primary': cooldownSeconds === 0,
+								'seibu-btn-submitting-state': reservationSubmitting,
+								'seibu-btn-cooldown': cooldownSeconds > 0,
+							}"
+							:disabled="reservationSubmitting || cooldownSeconds > 0"
+							:aria-busy="reservationSubmitting">
+							<Icon
+								:name="reservationSubmitting ? 'mdi:loading' : cooldownSeconds > 0 ? 'mdi:clock-outline' : 'mdi:send'"
+								:class="{ 'seibu-spin': reservationSubmitting }" />
 							{{
 								reservationSubmitting
 									? t('seibuFair.actions.submitting')
-									: t('seibuFair.actions.submitReservation')
+									: cooldownSeconds > 0
+										? t('seibuFair.actions.retryIn', { seconds: cooldownSeconds })
+										: t('seibuFair.actions.submitReservation')
 							}}
 						</button>
 					</form>
@@ -395,7 +452,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onUnmounted, reactive, ref, watch } from 'vue';
 import {
 	createSessionSeatMap,
 	getBookedSeats,
@@ -458,8 +515,8 @@ const EXHIBITOR_DISPLAY_NAMES_BY_ID = {
 
 const { locale, t } = useI18n();
 const { data: seibuEvent } = await useFetch('/api/content/seibu-fair', {
-	query: { lang: locale.value },
-	key: `seibu-fair-${locale.value}`,
+	key: 'seibu-fair',
+	query: computed(() => ({ lang: locale.value })),
 });
 
 const emptySeibuEvent = computed(() => ({
@@ -478,9 +535,27 @@ const emptySeibuEvent = computed(() => ({
 const event = computed(() => seibuEvent.value || emptySeibuEvent.value);
 const selectedExperienceId = ref('');
 const activeSession = ref(null);
+const sessionRefs = ref({});
 const formError = ref('');
 const reservationComplete = ref(false);
 const reservationSubmitting = ref(false);
+const cooldownSeconds = ref(0);
+let cooldownTimer = null;
+
+function startCooldown(seconds = 15) {
+	cooldownSeconds.value = seconds;
+	cooldownTimer = setInterval(() => {
+		cooldownSeconds.value--;
+		if (cooldownSeconds.value <= 0) {
+			clearInterval(cooldownTimer);
+			cooldownTimer = null;
+		}
+	}, 1000);
+}
+
+onUnmounted(() => {
+	if (cooldownTimer) clearInterval(cooldownTimer);
+});
 const reservationId = ref('');
 const reservationPreview = ref(false);
 const submittedReservation = ref(null);
@@ -542,6 +617,19 @@ const selectedExperience = computed(
 		event.value.experiences[0] ||
 		EMPTY_EXPERIENCE,
 );
+
+const orderedSessions = computed(() => {
+	const sessions = selectedExperience.value.sessions || [];
+	const upcoming = sessions.filter((s) => !isSessionPast(s));
+	const past = sessions.filter((s) => isSessionPast(s));
+	return { upcoming, past };
+});
+
+watch(selectedExperience, () => {
+	sessionRefs.value = {};
+	nextTick(scrollToNextSession);
+});
+
 const exhibitorsWithLogos = computed(() =>
 	(event.value.exhibitors || []).map((exhibitor) => {
 		const logoSrc = resolveExhibitorLogo(exhibitor);
@@ -595,6 +683,28 @@ function resolveExhibitorDisplayName(exhibitor) {
 
 function resolveExhibitorLogo(exhibitor) {
 	return asString(exhibitor?.logoSrc);
+}
+
+function isSessionPast(session) {
+	const match = String(session.id || '').match(/(\d{4}-\d{2}-\d{2})$/);
+	if (!match) return false;
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	return new Date(match[1]) < today;
+}
+
+function setSessionRef(el, sessionId) {
+	if (el) sessionRefs.value[sessionId] = el;
+}
+
+function scrollToNextSession() {
+	const firstUpcoming = orderedSessions.value.upcoming[0];
+	const target = firstUpcoming
+		? sessionRefs.value[firstUpcoming.id]
+		: Object.values(sessionRefs.value)[0];
+	if (target) {
+		target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+	}
 }
 
 function scrollToRegistration() {
@@ -691,6 +801,11 @@ function applyAvailability(availability = {}) {
 }
 
 function resolveReservationError(error) {
+	const status = error?.status || error?.statusCode || error?.data?.statusCode;
+	if (status === 429) {
+		startCooldown(15);
+		return t('seibuFair.errors.tooManyRequests');
+	}
 	return (
 		error?.data?.statusMessage ||
 		error?.data?.message ||
@@ -992,6 +1107,32 @@ useSeoMeta({
 	background: rgb(var(--tk-color-ink-rgb) / 2.5%);
 }
 
+.seibu-session-option--past {
+	--seibu-session-accent: var(--tk-color-muted);
+	opacity: 0.45;
+	pointer-events: none;
+}
+
+.seibu-past-divider {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-block: 0.25rem;
+	color: var(--tk-color-muted);
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.seibu-past-divider::before,
+.seibu-past-divider::after {
+	flex: 1;
+	height: 1px;
+	background: rgb(var(--tk-color-ink-rgb) / 10%);
+	content: '';
+}
+
 @media (hover: hover) {
 	.seibu-session-option:hover {
 		border-color: rgb(var(--tk-color-brand-brown-rgb) / 24%);
@@ -1098,7 +1239,8 @@ useSeoMeta({
 	color: var(--tk-color-white);
 }
 
-.seibu-session-full {
+.seibu-session-full,
+.seibu-session-past {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -1113,6 +1255,26 @@ useSeoMeta({
 	justify-self: end;
 	line-height: 1;
 	white-space: nowrap;
+}
+
+@keyframes seibu-spin {
+	to { transform: rotate(360deg); }
+}
+
+.seibu-spin {
+	animation: seibu-spin 0.75s linear infinite;
+}
+
+.seibu-btn-submitting-state {
+	opacity: 0.75;
+}
+
+.seibu-btn-cooldown {
+	border: 2px solid rgb(var(--tk-color-brand-brown-rgb) / 40%);
+	background: transparent;
+	color: var(--tk-color-muted);
+	cursor: not-allowed;
+	font-variant-numeric: tabular-nums;
 }
 
 .seibu-page :deep(.btn),
