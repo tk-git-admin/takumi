@@ -116,7 +116,8 @@
 			"companies": "Participating companies",
 			"products": "Selected products",
 			"registration": "Experience & Registration",
-			"registrationIntro": "Choose a workshop session and reserve your seat."
+			"registrationIntro": "Choose a workshop session and reserve your seat.",
+			"pastSessions": "Past sessions"
 		},
 		"tabs": {
 			"yukata": "Yukata",
@@ -132,9 +133,11 @@
 			"reserveSeat": "Reserve seat",
 			"reserve": "Reserve",
 			"full": "Full",
+			"past": "Past",
 			"done": "Done",
 			"submitting": "Submitting...",
-			"submitReservation": "Submit reservation"
+			"submitReservation": "Submit reservation",
+			"retryIn": "Try again in {seconds}s..."
 		},
 		"reservation": {
 			"completeTitle": "Thank you",
@@ -157,7 +160,8 @@
 			"participants": "Participants"
 		},
 		"errors": {
-			"registration": "Please enter your name, a valid email, and a participant count within the remaining seats."
+			"registration": "Please enter your name, a valid email, and a participant count within the remaining seats.",
+			"tooManyRequests": "Too many attempts. Please wait a moment before trying again."
 		},
 		"accessibility": {
 			"experienceType": "Experience type",
