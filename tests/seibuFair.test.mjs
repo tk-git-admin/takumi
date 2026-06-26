@@ -344,7 +344,7 @@ test('SEIBU registration session picker uses responsive option rows', async () =
 	assert.equal(pageSource.includes('seibu-session-list'), true);
 	assert.match(
 		pageSource,
-		/<article[\s\S]*v-for="session in selectedExperience\.sessions"[\s\S]*class="seibu-session-option"/,
+		/<article[\s\S]*v-for="session in orderedSessions\.upcoming"[\s\S]*class="seibu-session-option"/,
 	);
 	assert.match(pageSource, /\.seibu-session-option\s*\{[\s\S]*?display:\s*grid;/);
 	assert.match(
